@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Upload, FileText, AlertCircle, CheckCircle2, ArrowLeft,
-  Download, Layers, HelpCircle, BookOpen, ChevronDown, ChevronUp,
+  Download, Layers, HelpCircle, BookOpen, ChevronDown, ChevronUp, Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -163,6 +163,15 @@ function download(content: string, filename: string, type: string) {
 
 // ── Component ───────────────────────────────────────────────────────────────
 
+const VALID_ANSWERS = new Set(["A", "B", "C", "D"]);
+const VALID_DIFFICULTIES = new Set(["EASY", "MEDIUM", "HARD"]);
+
+function validateQ(q: ParsedQuestion): string | null {
+  if (!q.statement?.trim()) return "Enunciado obrigatório";
+  if (!VALID_ANSWERS.has((q.correctAnswer ?? "").toUpperCase())) return "correctAnswer deve ser A, B, C ou D";
+  return null;
+}
+
 export default function ImportPage() {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -195,6 +204,21 @@ export default function ImportPage() {
     setParseError(null);
     setResult(null);
     setExpandedModule(null);
+  }
+
+  function updateQ(index: number, field: keyof ParsedQuestion, value: string) {
+    setParsedQ((prev) => prev ? prev.map((q, i) => i === index ? { ...q, [field]: value } : q) : prev);
+  }
+
+  function updateBundleQ(mi: number, qi: number, field: keyof ParsedQuestion, value: string) {
+    setParsedB((prev) => {
+      if (!prev) return prev;
+      const next = prev.map((m, i) => {
+        if (i !== mi) return m;
+        return { ...m, questions: m.questions?.map((q, j) => j === qi ? { ...q, [field]: value } : q) };
+      });
+      return next;
+    });
   }
 
   function handleFile(file: File) {
@@ -270,6 +294,10 @@ export default function ImportPage() {
 
   const hasParsed = tab === "questions" ? (parsedQ && parsedQ.length > 0) : (parsedB && parsedB.length > 0);
   const totalQuestions = parsedB?.reduce((s, m) => s + (m.questions?.length ?? 0), 0) ?? 0;
+  const qErrors = parsedQ ? parsedQ.map(validateQ) : [];
+  const qErrorCount = qErrors.filter(Boolean).length;
+  const bErrors: (string | null)[][] = parsedB?.map((m) => m.questions?.map(validateQ) ?? []) ?? [];
+  const bErrorCount = bErrors.flat().filter(Boolean).length;
 
   return (
     <div className="space-y-6">
@@ -396,7 +424,10 @@ export default function ImportPage() {
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <div>
               <p className="font-semibold text-gray-900">{parsedQ.length} questões encontradas</p>
-              <p className="text-xs text-gray-500">Revise antes de importar</p>
+              {qErrorCount > 0
+                ? <p className="text-xs text-red-500 font-medium flex items-center gap-1 mt-0.5"><AlertCircle className="w-3.5 h-3.5" /> {qErrorCount} erro{qErrorCount !== 1 ? "s" : ""} — corrija antes de importar</p>
+                : <p className="text-xs text-gray-500">Edite células se necessário, depois importe</p>
+              }
             </div>
             <div className="flex gap-2">
               <button onClick={reset} className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg transition">
@@ -404,38 +435,71 @@ export default function ImportPage() {
               </button>
               <button
                 onClick={importQuestions}
-                disabled={importing}
-                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition"
+                disabled={importing || qErrorCount > 0}
+                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {importing ? "Importando..." : `Importar ${parsedQ.length} questões`}
               </button>
             </div>
           </div>
-          <div className="overflow-auto max-h-96">
+          <div className="overflow-auto max-h-[480px]">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 sticky top-0">
+              <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
                   <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-8">#</th>
                   <th className="text-left px-4 py-2 text-xs font-medium text-gray-500">Módulo</th>
                   <th className="text-left px-4 py-2 text-xs font-medium text-gray-500">Enunciado</th>
-                  <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-16">Correta</th>
-                  <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-20">Dificuldade</th>
+                  <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-24">Correta <Pencil className="w-3 h-3 inline ml-0.5 text-gray-400" /></th>
+                  <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-28">Dificuldade <Pencil className="w-3 h-3 inline ml-0.5 text-gray-400" /></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {parsedQ.map((q, i) => (
-                  <tr key={i} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 text-gray-400 text-xs">{i + 1}</td>
-                    <td className="px-4 py-2 text-gray-600 text-xs max-w-[140px] truncate">
-                      {q.moduleName ?? q.adminModuleId ?? "—"}
-                    </td>
-                    <td className="px-4 py-2 text-gray-800 max-w-xs truncate">{q.statement}</td>
-                    <td className="px-4 py-2">
-                      <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700">{q.correctAnswer}</span>
-                    </td>
-                    <td className="px-4 py-2 text-gray-500 text-xs">{q.difficulty ?? "MEDIUM"}</td>
-                  </tr>
-                ))}
+                {parsedQ.map((q, i) => {
+                  const err = qErrors[i];
+                  return (
+                    <tr key={i} className={cn(err ? "bg-red-50" : "hover:bg-gray-50")}>
+                      <td className="px-4 py-2 text-gray-400 text-xs">
+                        {err ? <span title={String(err ?? "")}><AlertCircle className="w-3.5 h-3.5 text-red-400" /></span> : i + 1}
+                      </td>
+                      <td className="px-4 py-2 text-gray-600 text-xs max-w-[140px] truncate">
+                        {q.moduleName ?? q.adminModuleId ?? "—"}
+                      </td>
+                      <td className="px-4 py-2 text-gray-800 max-w-xs">
+                        <input
+                          className="w-full text-xs bg-transparent border-0 focus:ring-1 focus:ring-indigo-300 rounded px-1 py-0.5 truncate"
+                          value={q.statement}
+                          onChange={(e) => updateQ(i, "statement", e.target.value)}
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <select
+                          value={(q.correctAnswer ?? "").toUpperCase()}
+                          onChange={(e) => updateQ(i, "correctAnswer", e.target.value)}
+                          className={cn(
+                            "text-xs font-bold rounded px-1.5 py-0.5 border focus:outline-none focus:ring-1 focus:ring-indigo-300",
+                            VALID_ANSWERS.has((q.correctAnswer ?? "").toUpperCase())
+                              ? "bg-green-100 text-green-700 border-green-200"
+                              : "bg-red-100 text-red-700 border-red-300"
+                          )}
+                        >
+                          <option value="">—</option>
+                          {["A","B","C","D"].map((v) => <option key={v} value={v}>{v}</option>)}
+                        </select>
+                      </td>
+                      <td className="px-4 py-2">
+                        <select
+                          value={VALID_DIFFICULTIES.has(q.difficulty ?? "") ? (q.difficulty ?? "MEDIUM") : "MEDIUM"}
+                          onChange={(e) => updateQ(i, "difficulty", e.target.value)}
+                          className="text-xs text-gray-600 bg-transparent border border-gray-200 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                        >
+                          <option value="EASY">Fácil</option>
+                          <option value="MEDIUM">Médio</option>
+                          <option value="HARD">Difícil</option>
+                        </select>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -450,7 +514,10 @@ export default function ImportPage() {
               <p className="font-semibold text-gray-900">
                 {parsedB.length} módulo{parsedB.length !== 1 ? "s" : ""} · {totalQuestions} questão{totalQuestions !== 1 ? "s" : ""}
               </p>
-              <p className="text-xs text-gray-500">Revise antes de importar</p>
+              {bErrorCount > 0
+                ? <p className="text-xs text-red-500 font-medium flex items-center gap-1 mt-0.5"><AlertCircle className="w-3.5 h-3.5" /> {bErrorCount} erro{bErrorCount !== 1 ? "s" : ""} — abra os módulos e corrija antes de importar</p>
+                : <p className="text-xs text-gray-500">Expanda os módulos para editar questões se necessário</p>
+              }
             </div>
             <div className="flex gap-2">
               <button onClick={reset} className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg transition">
@@ -458,77 +525,114 @@ export default function ImportPage() {
               </button>
               <button
                 onClick={importBundle}
-                disabled={importing}
-                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition"
+                disabled={importing || bErrorCount > 0}
+                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {importing ? "Importando..." : `Importar tudo`}
               </button>
             </div>
           </div>
 
-          {parsedB.map((m, mi) => (
-            <div key={mi} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <button
-                className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition text-left"
-                onClick={() => setExpandedModule(expandedModule === mi ? null : mi)}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                    <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{m.title || <span className="text-red-400 italic">sem título</span>}</p>
-                    <p className="text-xs text-gray-400">
-                      Cap. {m.ctflChapter ?? "?"} · {m.questions?.length ?? 0} questão{(m.questions?.length ?? 0) !== 1 ? "s" : ""}
-                      {m.summary ? "" : <span className="text-red-400"> · sem resumo</span>}
-                    </p>
-                  </div>
-                </div>
-                {expandedModule === mi
-                  ? <ChevronUp className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                  : <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />}
-              </button>
-
-              {expandedModule === mi && (
-                <div className="border-t border-gray-100">
-                  {m.summary && (
-                    <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
-                      <p className="text-xs font-medium text-gray-500 mb-1">Resumo (Markdown)</p>
-                      <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono line-clamp-4 max-h-24 overflow-hidden">{m.summary}</pre>
+          {parsedB.map((m, mi) => {
+            const moduleErrCount = bErrors[mi]?.filter(Boolean).length ?? 0;
+            return (
+              <div key={mi} className={cn("bg-white border rounded-xl overflow-hidden", moduleErrCount > 0 ? "border-red-200" : "border-gray-200")}>
+                <button
+                  className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition text-left"
+                  onClick={() => setExpandedModule(expandedModule === mi ? null : mi)}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0", moduleErrCount > 0 ? "bg-red-100" : "bg-indigo-100")}>
+                      <BookOpen className={cn("w-3.5 h-3.5", moduleErrCount > 0 ? "text-red-500" : "text-indigo-600")} />
                     </div>
-                  )}
-                  {(m.questions?.length ?? 0) > 0 ? (
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-8">#</th>
-                          <th className="text-left px-4 py-2 text-xs font-medium text-gray-500">Enunciado</th>
-                          <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-16">Correta</th>
-                          <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-20">Dificuldade</th>
-                          <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-24">Syllabus</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {m.questions!.map((q, qi) => (
-                          <tr key={qi} className="hover:bg-gray-50">
-                            <td className="px-4 py-2 text-gray-400 text-xs">{qi + 1}</td>
-                            <td className="px-4 py-2 text-gray-800 max-w-xs truncate text-xs">{q.statement}</td>
-                            <td className="px-4 py-2">
-                              <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700">{q.correctAnswer}</span>
-                            </td>
-                            <td className="px-4 py-2 text-gray-500 text-xs">{q.difficulty ?? "MEDIUM"}</td>
-                            <td className="px-4 py-2 text-gray-400 text-xs">{q.syllabusRef ?? "—"}</td>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{m.title || <span className="text-red-400 italic">sem título</span>}</p>
+                      <p className="text-xs text-gray-400">
+                        Cap. {m.ctflChapter ?? "?"} · {m.questions?.length ?? 0} questão{(m.questions?.length ?? 0) !== 1 ? "s" : ""}
+                        {moduleErrCount > 0 && <span className="text-red-500 font-medium"> · {moduleErrCount} erro{moduleErrCount !== 1 ? "s" : ""} — clique para corrigir</span>}
+                        {!m.summary && <span className="text-amber-500"> · sem resumo</span>}
+                      </p>
+                    </div>
+                  </div>
+                  {expandedModule === mi
+                    ? <ChevronUp className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    : <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />}
+                </button>
+
+                {expandedModule === mi && (
+                  <div className="border-t border-gray-100">
+                    {m.summary && (
+                      <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
+                        <p className="text-xs font-medium text-gray-500 mb-1">Resumo (Markdown)</p>
+                        <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono line-clamp-4 max-h-24 overflow-hidden">{m.summary}</pre>
+                      </div>
+                    )}
+                    {(m.questions?.length ?? 0) > 0 ? (
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-8">#</th>
+                            <th className="text-left px-4 py-2 text-xs font-medium text-gray-500">Enunciado</th>
+                            <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-24">Correta <Pencil className="w-3 h-3 inline ml-0.5 text-gray-400" /></th>
+                            <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-28">Dificuldade <Pencil className="w-3 h-3 inline ml-0.5 text-gray-400" /></th>
+                            <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 w-24">Syllabus</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <p className="px-5 py-3 text-xs text-gray-400 italic">Nenhuma questão neste módulo.</p>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {m.questions!.map((q, qi) => {
+                            const qErr = bErrors[mi]?.[qi];
+                            return (
+                              <tr key={qi} className={cn(qErr ? "bg-red-50" : "hover:bg-gray-50")}>
+                                <td className="px-4 py-2 text-gray-400 text-xs">
+                                  {qErr ? <span title={qErr}><AlertCircle className="w-3.5 h-3.5 text-red-400" /></span> : qi + 1}
+                                </td>
+                                <td className="px-4 py-2 text-gray-800 max-w-xs text-xs">
+                                  <input
+                                    className="w-full text-xs bg-transparent border-0 focus:ring-1 focus:ring-indigo-300 rounded px-1 py-0.5 truncate"
+                                    value={q.statement}
+                                    onChange={(e) => updateBundleQ(mi, qi, "statement", e.target.value)}
+                                  />
+                                </td>
+                                <td className="px-4 py-2">
+                                  <select
+                                    value={(q.correctAnswer ?? "").toUpperCase()}
+                                    onChange={(e) => updateBundleQ(mi, qi, "correctAnswer", e.target.value)}
+                                    className={cn(
+                                      "text-xs font-bold rounded px-1.5 py-0.5 border focus:outline-none focus:ring-1 focus:ring-indigo-300",
+                                      VALID_ANSWERS.has((q.correctAnswer ?? "").toUpperCase())
+                                        ? "bg-green-100 text-green-700 border-green-200"
+                                        : "bg-red-100 text-red-700 border-red-300"
+                                    )}
+                                  >
+                                    <option value="">—</option>
+                                    {["A","B","C","D"].map((v) => <option key={v} value={v}>{v}</option>)}
+                                  </select>
+                                </td>
+                                <td className="px-4 py-2">
+                                  <select
+                                    value={VALID_DIFFICULTIES.has(q.difficulty ?? "") ? (q.difficulty ?? "MEDIUM") : "MEDIUM"}
+                                    onChange={(e) => updateBundleQ(mi, qi, "difficulty", e.target.value)}
+                                    className="text-xs text-gray-600 bg-transparent border border-gray-200 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                                  >
+                                    <option value="EASY">Fácil</option>
+                                    <option value="MEDIUM">Médio</option>
+                                    <option value="HARD">Difícil</option>
+                                  </select>
+                                </td>
+                                <td className="px-4 py-2 text-gray-400 text-xs">{q.syllabusRef ?? "—"}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p className="px-5 py-3 text-xs text-gray-400 italic">Nenhuma questão neste módulo.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
