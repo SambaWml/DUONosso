@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rebuildUnifiedTrack } from "@/lib/unified-track";
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
+
+  // Always sync the track before loading — adds new admin modules, removes orphans/stale
+  await rebuildUnifiedTrack(session.user.id).catch(() => {});
 
   const [path, studyPlan] = await Promise.all([
     prisma.learningPath.findFirst({
@@ -38,7 +42,6 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   if (!path) return NextResponse.json({ error: "Trilha não encontrada." }, { status: 404 });
 
-  // Annotate each module with whether it's a weak area (study plan priority)
   const weakSet = new Set((studyPlan?.weakAreas ?? []).map((t) => t.toLowerCase().trim()));
   const modules = path.modules.map((mod) => ({
     ...mod,

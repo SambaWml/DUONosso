@@ -27,8 +27,9 @@ async function removeIntroChapters(userId: string) {
 }
 
 /**
- * Ensures exactly ONE "Trilha CTFL" exists for the user.
- * Prefers AdminModule records when available; falls back to Chapter-based track.
+ * Ensures exactly ONE "Trilha CTFL" exists for the user, always in sync with
+ * the current admin modules. Adds missing modules, removes orphans and stale
+ * chapter-based modules, re-orders everything.
  */
 export async function rebuildUnifiedTrack(
   userId: string
@@ -44,7 +45,15 @@ export async function rebuildUnifiedTrack(
   const allPaths = await prisma.learningPath.findMany({
     where: { userId },
     include: {
-      modules: { select: { id: true, chapterId: true, adminModuleId: true, status: true, orderIndex: true } },
+      modules: {
+        select: {
+          id: true,
+          chapterId: true,
+          adminModuleId: true,
+          status: true,
+          orderIndex: true,
+        },
+      },
     },
     orderBy: { createdAt: "asc" },
   });
@@ -63,10 +72,16 @@ export async function rebuildUnifiedTrack(
   });
 
   if (adminModules.length > 0) {
-    const sources: ModuleSource[] = adminModules.map((m) => ({ id: m.id, title: m.title, orderIndex: m.orderIndex }));
+    const sources: ModuleSource[] = adminModules.map((m) => ({
+      id: m.id,
+      title: m.title,
+      orderIndex: m.orderIndex,
+    }));
     const ordered = orderByStudyPlan(sources, studyPlan?.weakAreas ?? []);
+    const adminIdSet = new Set(ordered.map((m) => m.id));
 
     if (!unified) {
+      // First time: create the path
       await prisma.$transaction(async (tx) => {
         const path = await tx.learningPath.create({
           data: { user: { connect: { id: userId } }, title: "Trilha CTFL" },
@@ -84,22 +99,45 @@ export async function rebuildUnifiedTrack(
       return { created: true, modulesAdded: ordered.length };
     }
 
-    const existingByAdmin = new Map(unified.modules.map((m) => [m.adminModuleId, m]));
-    const newAdminMods = ordered.filter((m) => !existingByAdmin.has(m.id));
-
     await prisma.$transaction(async (tx) => {
-      if (newAdminMods.length > 0) {
+      // 1. Remove orphaned modules (admin module was deleted → adminModuleId is null)
+      //    and stale chapter-based modules (migrated from old PDF-based system)
+      await tx.learningModule.deleteMany({
+        where: {
+          pathId: unified.id,
+          OR: [
+            // orphaned: lost their admin module reference
+            { adminModuleId: null, chapterId: null },
+            // chapter-based: old system, now superseded by admin modules
+            { chapterId: { not: null } },
+            // admin module was removed from the active set
+            { adminModuleId: { notIn: [...adminIdSet] } },
+          ],
+        },
+      });
+
+      // 2. Fetch surviving modules
+      const surviving = await tx.learningModule.findMany({
+        where: { pathId: unified.id },
+        select: { id: true, adminModuleId: true, status: true },
+      });
+      const existingAdminIds = new Set(surviving.map((m) => m.adminModuleId).filter(Boolean));
+
+      // 3. Add modules not yet in the path
+      const toAdd = ordered.filter((m) => !existingAdminIds.has(m.id));
+      if (toAdd.length > 0) {
         await tx.learningModule.createMany({
-          data: newAdminMods.map((m, i) => ({
+          data: toAdd.map((m) => ({
             pathId: unified.id,
             adminModuleId: m.id,
             title: m.title,
-            orderIndex: 10000 + i,
+            orderIndex: 99999,
             status: "LOCKED" as const,
           })),
         });
       }
 
+      // 4. Re-order all modules according to admin ordering
       const allMods = await tx.learningModule.findMany({ where: { pathId: unified.id } });
       const rank = new Map(ordered.map((m, i) => [m.id, i]));
       const sorted = [...allMods].sort(
@@ -112,6 +150,8 @@ export async function rebuildUnifiedTrack(
         )
       );
 
+      // 5. Ensure unlock chain is correct:
+      //    completed modules stay completed, first non-completed is UNLOCKED, rest LOCKED
       const firstNonCompleted = sorted.find((m) => m.status !== "COMPLETED");
       await Promise.all(
         sorted
@@ -125,7 +165,7 @@ export async function rebuildUnifiedTrack(
       );
     });
 
-    return { created: false, modulesAdded: newAdminMods.length };
+    return { created: false, modulesAdded: ordered.filter((m) => !unified.modules.some((x) => x.adminModuleId === m.id)).length };
   }
 
   // ── Fallback: Chapter-based track ─────────────────────────────────────────
