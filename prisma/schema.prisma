@@ -12,6 +12,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -19,6 +24,7 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
+  role          UserRole  @default(USER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -167,15 +173,17 @@ enum SimulationStatus {
 }
 
 model SimulationAnswer {
-  id             String   @id @default(cuid())
-  simulationId   String
-  questionId     String
-  selectedAnswer String
-  isCorrect      Boolean
-  createdAt      DateTime @default(now())
+  id              String   @id @default(cuid())
+  simulationId    String
+  questionId      String?
+  adminQuestionId String?
+  selectedAnswer  String
+  isCorrect       Boolean
+  createdAt       DateTime @default(now())
 
-  simulation Simulation @relation(fields: [simulationId], references: [id], onDelete: Cascade)
-  question   Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  simulation    Simulation     @relation(fields: [simulationId], references: [id], onDelete: Cascade)
+  question      Question?      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  adminQuestion AdminQuestion? @relation(fields: [adminQuestionId], references: [id], onDelete: Cascade)
 
   @@map("simulation_answers")
 }
@@ -222,6 +230,55 @@ enum MaterialType {
   EXAM
 }
 
+// ─── Admin-managed global content ────────────────────────────────────────────
+
+model AdminModule {
+  id          String   @id @default(cuid())
+  title       String
+  ctflChapter Int
+  orderIndex  Int
+  summary     String   @db.Text
+  materialUrl String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  questions       AdminQuestion[]
+  learningModules LearningModule[]
+
+  @@index([ctflChapter, orderIndex])
+  @@map("admin_modules")
+}
+
+model AdminQuestion {
+  id            String         @id @default(cuid())
+  adminModuleId String
+  statement     String         @db.Text
+  imageUrl      String?
+  alternativeA  String         @db.Text
+  alternativeB  String         @db.Text
+  alternativeC  String         @db.Text
+  alternativeD  String         @db.Text
+  correctAnswer String
+  explanation   String         @db.Text
+  explanationA  String?        @db.Text
+  explanationB  String?        @db.Text
+  explanationC  String?        @db.Text
+  explanationD  String?        @db.Text
+  difficulty    Difficulty     @default(MEDIUM)
+  syllabusRef   String?
+  orderIndex    Int            @default(0)
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  adminModule       AdminModule        @relation(fields: [adminModuleId], references: [id], onDelete: Cascade)
+  simulationAnswers SimulationAnswer[]
+
+  @@index([adminModuleId, orderIndex])
+  @@map("admin_questions")
+}
+
 enum LearningModuleStatus {
   LOCKED
   UNLOCKED
@@ -243,18 +300,20 @@ model LearningPath {
 }
 
 model LearningModule {
-  id         String               @id @default(cuid())
-  pathId     String
-  chapterId  String
-  title      String
-  orderIndex Int
-  status     LearningModuleStatus @default(LOCKED)
-  bestScore  Int?
-  createdAt  DateTime             @default(now())
+  id            String               @id @default(cuid())
+  pathId        String
+  chapterId     String?
+  adminModuleId String?
+  title         String
+  orderIndex    Int
+  status        LearningModuleStatus @default(LOCKED)
+  bestScore     Int?
+  createdAt     DateTime             @default(now())
 
-  path     LearningPath    @relation(fields: [pathId], references: [id], onDelete: Cascade)
-  chapter  Chapter         @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  attempts ModuleAttempt[]
+  path        LearningPath    @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  chapter     Chapter?        @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  adminModule AdminModule?    @relation(fields: [adminModuleId], references: [id], onDelete: SetNull)
+  attempts    ModuleAttempt[]
 
   @@index([pathId, orderIndex])
   @@map("learning_modules")

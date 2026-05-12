@@ -8,7 +8,7 @@ import { rebuildUnifiedTrack } from "@/lib/unified-track";
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
-const client = (() => { try { return new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); } catch { return null as unknown as OpenAI; } })();
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function GET() {
   const session = await auth();
@@ -29,18 +29,12 @@ export async function POST(request: NextRequest) {
   const userId = session.user.id;
 
   // Gather performance data
-  const wrongAnswers = await prisma.simulationAnswer.findMany({
-    where: { isCorrect: false, simulation: { userId } },
-    include: {
-      question: {
-        include: { chapter: { select: { id: true, title: true } } },
-      },
-    },
-  });
-
   const allAnswers = await prisma.simulationAnswer.findMany({
     where: { simulation: { userId } },
-    include: { question: { select: { chapterId: true } } },
+    include: {
+      question: { include: { chapter: { select: { id: true, title: true } } } },
+      adminQuestion: { include: { adminModule: { select: { id: true, title: true } } } },
+    },
   });
 
   if (allAnswers.length === 0) {
@@ -50,18 +44,24 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Chapter error rates
+  // Chapter error rates — covers both AdminQuestion and AI Question sources
   const chapterMap: Record<string, { title: string; errors: number; total: number }> = {};
   for (const a of allAnswers) {
-    const cid = a.question.chapterId;
-    if (!chapterMap[cid]) chapterMap[cid] = { title: "", errors: 0, total: 0 };
-    chapterMap[cid].total++;
-  }
-  for (const a of wrongAnswers) {
-    const cid = a.question.chapterId;
-    if (!chapterMap[cid]) chapterMap[cid] = { title: a.question.chapter.title, errors: 0, total: 0 };
-    chapterMap[cid].title = a.question.chapter.title;
-    chapterMap[cid].errors++;
+    let key: string | undefined;
+    let title: string | undefined;
+
+    if (a.adminQuestionId && a.adminQuestion?.adminModule) {
+      key = a.adminQuestion.adminModule.id;
+      title = a.adminQuestion.adminModule.title;
+    } else if (a.questionId && a.question) {
+      key = a.question.chapterId ?? undefined;
+      title = a.question.chapter?.title ?? undefined;
+    }
+
+    if (!key || !title) continue;
+    if (!chapterMap[key]) chapterMap[key] = { title, errors: 0, total: 0 };
+    chapterMap[key].total++;
+    if (!a.isCorrect) chapterMap[key].errors++;
   }
 
   const weakAreas = Object.entries(chapterMap)

@@ -44,3 +44,6 @@ next-env.d.ts
 
 # uploaded PDFs (persisted via Railway volume)
 /uploads
+
+# uploaded images
+/public/uploads

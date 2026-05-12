@@ -98,9 +98,14 @@ export default function HistoryPage() {
       ) : (
         <div className="bg-white rounded-2xl border border-gray-200">
           <div className="divide-y divide-gray-100">
-            {simulations.map((sim, i) => {
+            {(() => {
+              const bestIdx = simulations.reduce(
+                (best, sim, i) => sim.percentage > simulations[best].percentage ? i : best,
+                0
+              );
+              return simulations.map((sim, i) => {
               const badge = getScoreBadge(sim.percentage);
-              const isFirst = i === 0;
+              const isBest = i === bestIdx;
 
               return (
                 <Link
@@ -111,9 +116,9 @@ export default function HistoryPage() {
                   {/* Index */}
                   <div className={cn(
                     "w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0",
-                    isFirst ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-500"
+                    isBest ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-500"
                   )}>
-                    {isFirst ? <Trophy className="w-4 h-4" /> : `#${totalSimulations - i}`}
+                    {isBest ? <Trophy className="w-4 h-4" /> : `#${totalSimulations - i}`}
                   </div>
 
                   {/* Info */}
@@ -148,7 +153,8 @@ export default function HistoryPage() {
                   </div>
                 </Link>
               );
-            })}
+            });
+            })()}
           </div>
         </div>
       )}

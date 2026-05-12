@@ -25,24 +25,16 @@ export default function TrilhaPage() {
 
   useEffect(() => {
     async function init() {
-      const [rawPaths, materials, simulations] = await Promise.all([
+      const [rawPaths, simulations] = await Promise.all([
         fetch("/api/learning-paths").then((r) => r.json()),
-        fetch("/api/materials").then((r) => r.json()),
         fetch("/api/simulations").then((r) => r.json()),
       ]);
 
       const pathList: LearningPath[] = Array.isArray(rawPaths) ? rawPaths : [];
 
-      // Auto-consolidate if there are multiple paths or none titled "Trilha CTFL"
       const needsRebuild =
         pathList.length > 1 ||
-        (pathList.length === 1 && pathList[0].title !== "Trilha CTFL") ||
-        (pathList.length === 0 &&
-          Array.isArray(materials) &&
-          materials.some((m: { status: string }) => m.status === "READY"));
-
-      // Always try to rename generic "Seção N" chapters (no-op if none exist)
-      fetch("/api/materials/rename-sections", { method: "POST" }).catch(() => {});
+        (pathList.length === 1 && pathList[0].title !== "Trilha CTFL");
 
       if (needsRebuild) {
         try {
@@ -61,7 +53,7 @@ export default function TrilhaPage() {
       }
 
       setSteps({
-        hasMaterial: Array.isArray(materials) && materials.some((m: { status: string }) => m.status === "READY"),
+        hasMaterial: true, // admin always provides content
         hasSimulation: Array.isArray(simulations) && simulations.length > 0,
       });
       setLoading(false);
@@ -92,10 +84,9 @@ export default function TrilhaPage() {
 
   const track = paths.find((p) => p.title === "Trilha CTFL") ?? paths[0] ?? null;
   const trackAllDone = track ? track.modules.length > 0 && track.modules.every((m) => m.status === "COMPLETED") : false;
-  const nextStep = !steps.hasMaterial ? "material" : !steps.hasSimulation ? "simulation" : null;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="max-w-3xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-2xl bg-orange-100 flex items-center justify-center flex-shrink-0">
@@ -184,41 +175,32 @@ export default function TrilhaPage() {
         </div>
       )}
 
-      {/* Setup flow */}
-      {(!track || nextStep) && (
+      {/* Setup flow — only shown when no track exists */}
+      {!track && (
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-            {!track ? "Como funciona" : "Próximos passos"}
-          </h2>
-
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Como funciona</h2>
           <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden divide-y divide-gray-100">
             <StepRow
               number={1}
-              done={steps.hasMaterial}
-              active={!steps.hasMaterial}
-              icon={<BookOpen className="w-4 h-4" />}
-              title="Envie um material"
-              description="Faça upload do syllabus CTFL ou de uma prova anterior em PDF"
-              cta="Fazer upload"
-              onClick={() => router.push("/upload")}
-            />
-            <StepRow
-              number={2}
               done={steps.hasSimulation}
-              active={steps.hasMaterial && !steps.hasSimulation}
+              active={!steps.hasSimulation}
               icon={<PlayCircle className="w-4 h-4" />}
               title="Realize o simulado diagnóstico"
-              description="40 questões — a IA analisa seus erros e monta a trilha automaticamente"
+              description="40 questões do banco oficial CTFL — a IA analisa seus erros e monta sua trilha personalizada"
               cta="Ir para simulado"
               onClick={() => router.push("/simulation")}
             />
+            <StepRow
+              number={2}
+              done={false}
+              active={steps.hasSimulation}
+              icon={<BookOpen className="w-4 h-4" />}
+              title="Siga sua trilha personalizada"
+              description="Estude cada módulo pelo resumo e responda os quizzes para avançar"
+              cta=""
+              onClick={() => {}}
+            />
           </div>
-
-          {!track && steps.hasSimulation && (
-            <p className="text-sm text-center text-gray-500">
-              Simulado realizado — se a trilha não apareceu, refaça o upload do material.
-            </p>
-          )}
         </div>
       )}
     </div>

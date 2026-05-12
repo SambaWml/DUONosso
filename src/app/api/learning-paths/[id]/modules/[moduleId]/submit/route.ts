@@ -37,31 +37,68 @@ export async function POST(
 
   if (!mod) return NextResponse.json({ error: "Módulo não encontrado." }, { status: 404 });
 
-  // Fetch correct answers for the submitted question IDs
   const questionIds = answers.map((a) => a.questionId);
+
+  // ── Admin module: look up AdminQuestion ──────────────────────────────────
+  if (mod.adminModuleId) {
+    const adminQs = await prisma.adminQuestion.findMany({
+      where: { id: { in: questionIds }, adminModuleId: mod.adminModuleId },
+      select: {
+        id: true, correctAnswer: true, explanation: true,
+        explanationA: true, explanationB: true, explanationC: true, explanationD: true,
+        statement: true, imageUrl: true,
+        alternativeA: true, alternativeB: true, alternativeC: true, alternativeD: true,
+        difficulty: true, syllabusRef: true,
+      },
+    });
+
+    const qMap = new Map(adminQs.map((q) => [q.id, q]));
+    const evaluated = answers
+      .map((a) => {
+        const q = qMap.get(a.questionId);
+        if (!q) return null;
+        const correct = q.correctAnswer === a.selected;
+        return {
+          questionId: a.questionId,
+          selected: a.selected,
+          correct,
+          correctAnswer: q.correctAnswer,
+          explanation: q.explanation,
+          explanationA: q.explanationA ?? "",
+          explanationB: q.explanationB ?? "",
+          explanationC: q.explanationC ?? "",
+          explanationD: q.explanationD ?? "",
+          statement: q.statement,
+          imageUrl: q.imageUrl ?? null,
+          alternativeA: q.alternativeA,
+          alternativeB: q.alternativeB,
+          alternativeC: q.alternativeC,
+          alternativeD: q.alternativeD,
+          difficulty: q.difficulty,
+          syllabusRef: q.syllabusRef ?? null,
+        };
+      })
+      .filter(Boolean);
+
+    return await finishAttempt(mod, moduleId, session.user.id, evaluated);
+  }
+
+  // ── AI question fallback ─────────────────────────────────────────────────
   const questions = await prisma.question.findMany({
     where: {
       id: { in: questionIds },
       chapter: { material: { userId: session.user.id } },
     },
     select: {
-      id: true,
-      correctAnswer: true,
-      explanation: true,
-      explanationA: true,
-      explanationB: true,
-      explanationC: true,
-      explanationD: true,
+      id: true, correctAnswer: true, explanation: true,
+      explanationA: true, explanationB: true, explanationC: true, explanationD: true,
       statement: true,
-      alternativeA: true,
-      alternativeB: true,
-      alternativeC: true,
-      alternativeD: true,
+      alternativeA: true, alternativeB: true, alternativeC: true, alternativeD: true,
+      difficulty: true, syllabusRef: true,
     },
   });
 
   const qMap = new Map(questions.map((q) => [q.id, q]));
-
   const evaluated = answers
     .map((a) => {
       const q = qMap.get(a.questionId);
@@ -78,31 +115,35 @@ export async function POST(
         explanationC: q.explanationC,
         explanationD: q.explanationD,
         statement: q.statement,
+        imageUrl: null,
         alternativeA: q.alternativeA,
         alternativeB: q.alternativeB,
         alternativeC: q.alternativeC,
         alternativeD: q.alternativeD,
+        difficulty: q.difficulty,
+        syllabusRef: q.syllabusRef ?? null,
       };
     })
     .filter(Boolean);
 
+  return await finishAttempt(mod, moduleId, session.user.id, evaluated);
+}
+
+async function finishAttempt(
+  mod: { status: string; bestScore: number | null; path: { modules: { id: string; orderIndex: number; status: string }[] } },
+  moduleId: string,
+  userId: string,
+  evaluated: unknown[]
+) {
   const total = evaluated.length;
-  const correct = evaluated.filter((e) => e!.correct).length;
+  const correct = (evaluated as { correct: boolean }[]).filter((e) => e.correct).length;
   const score = total > 0 ? Math.round((correct / total) * 100) : 0;
   const passed = score >= 70;
 
-  // Save attempt
   await prisma.moduleAttempt.create({
-    data: {
-      moduleId,
-      userId: session.user.id!,
-      score,
-      passed,
-      answers: evaluated,
-    },
+    data: { moduleId, userId, score, passed, answers: evaluated as object[] },
   });
 
-  // Update module status
   const updates: Array<Promise<unknown>> = [];
 
   if (passed && mod.status !== "COMPLETED") {
@@ -113,7 +154,6 @@ export async function POST(
       })
     );
 
-    // Unlock the next locked module in order (find by next orderIndex, not +1 arithmetic)
     const sortedMods = [...mod.path.modules].sort((a, b) => a.orderIndex - b.orderIndex);
     const currentPos = sortedMods.findIndex((m) => m.id === moduleId);
     const nextMod = currentPos !== -1
@@ -121,10 +161,7 @@ export async function POST(
       : undefined;
     if (nextMod) {
       updates.push(
-        prisma.learningModule.update({
-          where: { id: nextMod.id },
-          data: { status: "UNLOCKED" },
-        })
+        prisma.learningModule.update({ where: { id: nextMod.id }, data: { status: "UNLOCKED" } })
       );
     }
   } else if (passed && mod.status === "COMPLETED") {

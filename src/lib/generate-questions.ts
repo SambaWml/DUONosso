@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 
-const openai = (() => { try { return new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); } catch { return null as unknown as OpenAI; } })();
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function generateQuestionsForChapter(
   chapterId: string,

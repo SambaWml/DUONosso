@@ -12,7 +12,7 @@ export async function GET() {
     where: { userId: session.user.id },
     include: {
       material: { select: { filename: true, type: true } },
-      modules: { select: { id: true, status: true, title: true } },
+      modules: { select: { id: true, status: true, title: true, adminModuleId: true } },
     },
     orderBy: { createdAt: "desc" },
   });

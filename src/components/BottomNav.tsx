@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  Upload,
+  History,
   PlayCircle,
   BookOpen,
   Flame,
@@ -14,8 +14,8 @@ import {
 const mobileNavItems = [
   { href: "/dashboard", label: "Início", icon: LayoutDashboard },
   { href: "/trilha", label: "Trilha", icon: Flame },
-  { href: "/upload", label: "Upload", icon: Upload },
   { href: "/simulation", label: "Simulado", icon: PlayCircle },
+  { href: "/history", label: "Histórico", icon: History },
   { href: "/study-plan", label: "Plano", icon: BookOpen },
 ];
 

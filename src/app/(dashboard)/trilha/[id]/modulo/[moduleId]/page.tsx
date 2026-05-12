@@ -12,6 +12,7 @@ import {
   BookOpen,
   PlayCircle,
   ImageIcon,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
@@ -19,12 +20,15 @@ import remarkGfm from "remark-gfm";
 
 interface Question {
   id: string;
+  source?: "admin" | "ai";
   statement: string;
+  imageUrl?: string | null;
   alternativeA: string;
   alternativeB: string;
   alternativeC: string;
   alternativeD: string;
   difficulty: string;
+  syllabusRef?: string | null;
 }
 
 interface EvaluatedAnswer {
@@ -38,15 +42,27 @@ interface EvaluatedAnswer {
   explanationC: string;
   explanationD: string;
   statement: string;
+  imageUrl?: string | null;
   alternativeA: string;
   alternativeB: string;
   alternativeC: string;
   alternativeD: string;
+  difficulty?: string;
+  syllabusRef?: string | null;
 }
 
 type Phase = "loading" | "study" | "quiz" | "result" | "error";
 
 const OPTIONS = ["A", "B", "C", "D"] as const;
+
+function quizDraftKey(moduleId: string) { return `ctfl-quiz-${moduleId}`; }
+
+interface QuizDraft {
+  questions: Question[];
+  answers: Array<{ questionId: string; selected: string }>;
+  currentIdx: number;
+  savedAt: number;
+}
 
 export default function ModulePage() {
   const { id: pathId, moduleId } = useParams<{ id: string; moduleId: string }>();
@@ -57,6 +73,7 @@ export default function ModulePage() {
   const [moduleTitle, setModuleTitle] = useState("");
   const [chapterContent, setChapterContent] = useState("");
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [materialUrl, setMaterialUrl] = useState<string | null>(null);
   const [startPage, setStartPage] = useState<number | null>(null);
   const [endPage, setEndPage] = useState<number | null>(null);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -73,12 +90,33 @@ export default function ModulePage() {
   const [submitting, setSubmitting] = useState(false);
   const [chapterId, setChapterId] = useState("");
 
-  const loadQuestions = useCallback(async () => {
+  const loadQuestions = useCallback(async (forceNew = false) => {
     setPhase("loading");
-    setAnswers([]);
-    setCurrentIdx(0);
     setSelected(null);
     setResult(null);
+
+    // Resume from draft if available and not forcing a new attempt
+    if (!forceNew) {
+      try {
+        const raw = localStorage.getItem(quizDraftKey(moduleId));
+        if (raw) {
+          const draft = JSON.parse(raw) as QuizDraft;
+          // Discard drafts older than 2h
+          if (Date.now() - draft.savedAt < 2 * 60 * 60 * 1000 && draft.questions.length > 0) {
+            setQuestions(draft.questions);
+            setAnswers(draft.answers);
+            setCurrentIdx(draft.currentIdx);
+            setPhase("quiz");
+            return;
+          }
+          localStorage.removeItem(quizDraftKey(moduleId));
+        }
+      } catch { /* ignore */ }
+    } else {
+      localStorage.removeItem(quizDraftKey(moduleId));
+      setAnswers([]);
+      setCurrentIdx(0);
+    }
 
     const res = await fetch(
       `/api/learning-paths/${pathId}/modules/${moduleId}/start`,
@@ -96,6 +134,7 @@ export default function ModulePage() {
     setChapterContent(data.chapterContent ?? "");
     setChapterId(data.chapterId ?? "");
     setPdfUrl(data.pdfUrl ?? null);
+    setMaterialUrl(data.materialUrl ?? null);
     setStartPage(data.startPage ?? null);
     setEndPage(data.endPage ?? null);
     setPhase("study");
@@ -104,6 +143,13 @@ export default function ModulePage() {
   useEffect(() => {
     loadQuestions();
   }, [loadQuestions]);
+
+  // Persist quiz progress to localStorage while answering
+  useEffect(() => {
+    if (phase !== "quiz" || questions.length === 0) return;
+    const draft: QuizDraft = { questions, answers, currentIdx, savedAt: Date.now() };
+    localStorage.setItem(quizDraftKey(moduleId), JSON.stringify(draft));
+  }, [phase, questions, answers, currentIdx, moduleId]);
 
   async function submitAnswers(finalAnswers: typeof answers) {
     setSubmitting(true);
@@ -116,6 +162,7 @@ export default function ModulePage() {
       }
     );
     const data = await res.json();
+    localStorage.removeItem(quizDraftKey(moduleId));
     setSubmitting(false);
     setResult(data);
     setPhase("result");
@@ -162,12 +209,10 @@ export default function ModulePage() {
   // Study phase — read the chapter content before the quiz
   if (phase === "study")
     return (
-      <div className="max-w-2xl mx-auto space-y-5">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.push(`/trilha/${pathId}`)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
-          >
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-5">
+          <button onClick={() => router.push(`/trilha/${pathId}`)} className="p-2 hover:bg-gray-100 rounded-lg transition">
             <ChevronLeft className="w-5 h-5 text-gray-500" />
           </button>
           <div className="flex-1 min-w-0">
@@ -176,128 +221,126 @@ export default function ModulePage() {
           </div>
         </div>
 
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-sm text-amber-800">
-          <BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5" />
-          <span>
-            Leia o conteúdo abaixo antes de responder as questões.
-            Você precisará de <strong>70%</strong> de acertos para avançar.
-          </span>
-        </div>
+        {/* 2-column layout on desktop */}
+        <div className="flex gap-6 items-start">
+          {/* Left — chapter content */}
+          <div className="flex-1 min-w-0 space-y-4">
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-sm text-amber-800">
+              <BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span>Leia o conteúdo antes de responder. Você precisa de <strong>70%</strong> de acertos para avançar.</span>
+            </div>
 
-        {/* PDF page viewer — shows diagrams, images, and full layout */}
-        {pdfUrl && startPage && (
-          <PdfPageViewer
-            pdfUrl={pdfUrl}
-            startPage={startPage}
-            endPage={endPage ?? startPage}
-          />
-        )}
+            {pdfUrl && startPage && (
+              <PdfPageViewer pdfUrl={pdfUrl} startPage={startPage} endPage={endPage ?? startPage} />
+            )}
 
-        <div className="bg-white border border-gray-200 rounded-2xl p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-indigo-500" />
-            {moduleTitle}
-          </h2>
-          <div className="text-sm text-gray-700 leading-relaxed">
-            {chapterContent ? (
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  h2: ({ children }) => (
-                    <h2 className="text-base font-bold text-gray-900 mt-5 mb-2 border-b border-gray-100 pb-1">{children}</h2>
-                  ),
-                  h3: ({ children }) => (
-                    <h3 className="text-sm font-semibold text-indigo-800 mt-4 mb-1">{children}</h3>
-                  ),
-                  p: ({ children }) => (
-                    <p className="mb-3 leading-relaxed">{children}</p>
-                  ),
-                  strong: ({ children }) => (
-                    <strong className="font-semibold text-gray-900">{children}</strong>
-                  ),
-                  em: ({ children }) => (
-                    <em className="italic text-gray-600">{children}</em>
-                  ),
-                  ul: ({ children }) => (
-                    <ul className="list-disc list-outside ml-5 mb-3 space-y-1">{children}</ul>
-                  ),
-                  ol: ({ children }) => (
-                    <ol className="list-decimal list-outside ml-5 mb-3 space-y-1">{children}</ol>
-                  ),
-                  li: ({ children }) => (
-                    <li className="leading-relaxed">{children}</li>
-                  ),
-                  blockquote: ({ children }) => {
-                    // Detect figure references and show a PDF hint instead
-                    const text = typeof children === "string"
-                      ? children
-                      : Array.isArray(children)
-                        ? children.map((c) => (typeof c === "string" ? c : (c as { props?: { children?: string } })?.props?.children ?? "")).join("")
-                        : "";
-                    const isFigure = /figura|figure|diagrama|diagram|imagem|image/i.test(text);
-                    if (isFigure && pdfUrl) {
-                      return (
-                        <div
-                          className="flex items-center gap-3 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3 my-3 cursor-pointer hover:bg-indigo-100 transition"
-                          onClick={() => {
-                            const el = document.getElementById("pdf-viewer-toggle");
-                            if (el) { el.click(); el.scrollIntoView({ behavior: "smooth", block: "center" }); }
-                          }}
-                        >
-                          <ImageIcon className="w-4 h-4 text-indigo-500 flex-shrink-0" />
-                          <div>
-                            <p className="text-xs font-semibold text-indigo-800">{text || "Figura no PDF"}</p>
-                            <p className="text-xs text-indigo-600 mt-0.5">Clique para abrir o PDF e ver a imagem original</p>
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-indigo-500" /> {moduleTitle}
+              </h2>
+              <div className="text-sm text-gray-700 leading-relaxed">
+                {chapterContent ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+                    h2: ({ children }) => <h2 className="text-base font-bold text-gray-900 mt-5 mb-2 border-b border-gray-100 pb-1">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-sm font-semibold text-indigo-800 mt-4 mb-1">{children}</h3>,
+                    p: ({ children }) => <p className="mb-3 leading-relaxed">{children}</p>,
+                    strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                    em: ({ children }) => <em className="italic text-gray-600">{children}</em>,
+                    ul: ({ children }) => <ul className="list-disc list-outside ml-5 mb-3 space-y-1">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-outside ml-5 mb-3 space-y-1">{children}</ol>,
+                    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                    blockquote: ({ children }) => {
+                      const text = typeof children === "string" ? children : Array.isArray(children) ? children.map((c) => (typeof c === "string" ? c : (c as { props?: { children?: string } })?.props?.children ?? "")).join("") : "";
+                      const isFigure = /figura|figure|diagrama|diagram|imagem|image/i.test(text);
+                      if (isFigure && pdfUrl) {
+                        return (
+                          <div className="flex items-center gap-3 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3 my-3 cursor-pointer hover:bg-indigo-100 transition" onClick={() => { const el = document.getElementById("pdf-viewer-toggle"); if (el) { el.click(); el.scrollIntoView({ behavior: "smooth", block: "center" }); } }}>
+                            <ImageIcon className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                            <div>
+                              <p className="text-xs font-semibold text-indigo-800">{text || "Figura no PDF"}</p>
+                              <p className="text-xs text-indigo-600 mt-0.5">Clique para abrir o PDF e ver a imagem original</p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    return (
-                      <blockquote className="border-l-4 border-amber-400 bg-amber-50 rounded-r-lg px-4 py-3 my-3 text-sm text-amber-900">
-                        {children}
-                      </blockquote>
-                    );
-                  },
-                  table: ({ children }) => (
-                    <div className="overflow-x-auto my-4 rounded-xl border border-gray-200">
-                      <table className="min-w-full text-xs border-collapse">{children}</table>
-                    </div>
-                  ),
-                  thead: ({ children }) => (
-                    <thead className="bg-indigo-50">{children}</thead>
-                  ),
-                  th: ({ children }) => (
-                    <th className="px-3 py-2 text-left font-semibold text-indigo-800 border-b border-gray-200 whitespace-nowrap">
-                      {children}
-                    </th>
-                  ),
-                  td: ({ children }) => (
-                    <td className="px-3 py-2 text-gray-700 border-b border-gray-100 align-top">{children}</td>
-                  ),
-                  code: ({ children }) => (
-                    <code className="bg-gray-100 text-indigo-700 rounded px-1 py-0.5 text-xs font-mono">{children}</code>
-                  ),
-                  pre: ({ children }) => (
-                    <pre className="bg-gray-900 text-gray-100 rounded-xl p-4 overflow-x-auto my-3 text-xs font-mono">{children}</pre>
-                  ),
-                  hr: () => <hr className="my-4 border-gray-200" />,
-                }}
+                        );
+                      }
+                      return <blockquote className="border-l-4 border-amber-400 bg-amber-50 rounded-r-lg px-4 py-3 my-3 text-sm text-amber-900">{children}</blockquote>;
+                    },
+                    table: ({ children }) => <div className="overflow-x-auto my-4 rounded-xl border border-gray-200"><table className="min-w-full text-xs border-collapse">{children}</table></div>,
+                    thead: ({ children }) => <thead className="bg-indigo-50">{children}</thead>,
+                    th: ({ children }) => <th className="px-3 py-2 text-left font-semibold text-indigo-800 border-b border-gray-200 whitespace-nowrap">{children}</th>,
+                    td: ({ children }) => <td className="px-3 py-2 text-gray-700 border-b border-gray-100 align-top">{children}</td>,
+                    code: ({ children }) => <code className="bg-gray-100 text-indigo-700 rounded px-1 py-0.5 text-xs font-mono">{children}</code>,
+                    pre: ({ children }) => <pre className="bg-gray-900 text-gray-100 rounded-xl p-4 overflow-x-auto my-3 text-xs font-mono">{children}</pre>,
+                    hr: () => <hr className="my-4 border-gray-200" />,
+                  }}>
+                    {chapterContent}
+                  </ReactMarkdown>
+                ) : (
+                  <p className="text-gray-400 italic">Conteúdo do capítulo não disponível.</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right — sticky action panel */}
+          <div className="hidden lg:flex flex-col gap-4 w-72 flex-shrink-0 sticky top-4">
+            <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Módulo</p>
+                <p className="font-semibold text-gray-900 text-sm">{moduleTitle}</p>
+              </div>
+              <div className="space-y-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">1</span>
+                  <span>Leia o resumo à esquerda</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">2</span>
+                  <span>Responda 10 questões</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-600 flex-shrink-0">3</span>
+                  <span>Acerte 70% para avançar</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setPhase("quiz")}
+                className="w-full py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-2"
               >
-                {chapterContent}
-              </ReactMarkdown>
-            ) : (
-              <p className="text-gray-400 italic">Conteúdo do capítulo não disponível.</p>
+                <PlayCircle className="w-5 h-5" /> Iniciar Quiz
+              </button>
+            </div>
+
+            {materialUrl && (
+              <a
+                href={materialUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3 text-sm text-blue-800 hover:bg-blue-100 transition"
+              >
+                <ExternalLink className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                <div>
+                  <p className="font-medium">Material de apoio</p>
+                  <p className="text-xs text-blue-600 mt-0.5">Abrir recurso externo</p>
+                </div>
+              </a>
             )}
           </div>
         </div>
 
-        <button
-          onClick={() => setPhase("quiz")}
-          className="w-full py-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-2 text-lg"
-        >
-          <PlayCircle className="w-5 h-5" />
-          Pronto! Iniciar Quiz →
-        </button>
+        {/* Mobile start button */}
+        <div className="lg:hidden mt-5 space-y-3">
+          {materialUrl && (
+            <a href={materialUrl} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800">
+              <ExternalLink className="w-4 h-4 text-blue-500 flex-shrink-0" />
+              <span>Material de apoio</span>
+            </a>
+          )}
+          <button onClick={() => setPhase("quiz")} className="w-full py-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-2 text-lg">
+            <PlayCircle className="w-5 h-5" /> Pronto! Iniciar Quiz →
+          </button>
+        </div>
       </div>
     );
 
@@ -346,6 +389,9 @@ export default function ModulePage() {
               .map((e, i) => (
                 <div key={i} className="bg-white border border-red-200 rounded-xl p-4 space-y-2">
                   <p className="text-sm font-medium text-gray-900">{e.statement}</p>
+                  {e.imageUrl && (
+                    <img src={e.imageUrl} alt="Imagem da questão" className="rounded-lg max-h-48 object-contain w-full border border-gray-200" />
+                  )}
                   {OPTIONS.map((opt) => {
                     const text = e[`alternative${opt}` as keyof EvaluatedAnswer] as string;
                     const isCorrect = e.correctAnswer === opt;
@@ -376,7 +422,7 @@ export default function ModulePage() {
         <div className="flex gap-3">
           {!passed && (
             <button
-              onClick={loadQuestions}
+              onClick={() => loadQuestions(true)}
               className="flex-1 flex items-center justify-center gap-2 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition"
             >
               <RotateCcw className="w-4 h-4" />
@@ -433,6 +479,9 @@ export default function ModulePage() {
           <Flame className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
           <p className="text-gray-900 font-medium leading-relaxed">{q.statement}</p>
         </div>
+        {q.imageUrl && (
+          <img src={q.imageUrl} alt="Imagem da questão" className="rounded-xl border border-gray-200 max-h-64 object-contain w-full" />
+        )}
 
         <div className="space-y-2.5">
           {OPTIONS.map((opt) => {

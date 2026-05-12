@@ -32,6 +32,7 @@ interface TrackProgress {
   done: number;
   total: number;
   currentModule: string | null;
+  currentModuleId: string | null;
 }
 
 export default function DashboardPage() {
@@ -52,7 +53,7 @@ export default function DashboardPage() {
       if (p) {
         const done = p.modules.filter((m) => m.status === "COMPLETED").length;
         const current = p.modules.find((m) => m.status === "UNLOCKED");
-        setTrack({ id: p.id, title: p.title, done, total: p.modules.length, currentModule: current?.title ?? null });
+        setTrack({ id: p.id, title: p.title, done, total: p.modules.length, currentModule: current?.title ?? null, currentModuleId: current?.id ?? null });
       }
       setLoading(false);
     });
@@ -86,47 +87,48 @@ export default function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          icon={<PlayCircle className="w-5 h-5 text-indigo-600" />}
-          label="Simulados"
+          icon={<PlayCircle className="w-6 h-6 text-indigo-600" />}
+          label="Simulados Realizados"
           value={stats?.totalSimulations ?? 0}
           bg="bg-indigo-50"
         />
         <StatCard
-          icon={<Target className="w-5 h-5 text-green-600" />}
+          icon={<Target className="w-6 h-6 text-green-600" />}
           label="Média Geral"
           value={`${stats?.averageScore ?? 0}%`}
           bg="bg-green-50"
+          highlight={stats ? stats.averageScore >= 65 : false}
         />
         <StatCard
-          icon={<Brain className="w-5 h-5 text-purple-600" />}
-          label="Questões"
+          icon={<Brain className="w-6 h-6 text-purple-600" />}
+          label="Questões no Banco"
           value={stats?.totalQuestions ?? 0}
           bg="bg-purple-50"
         />
         <StatCard
-          icon={<BookOpen className="w-5 h-5 text-orange-600" />}
-          label="Materiais"
+          icon={<BookOpen className="w-6 h-6 text-orange-600" />}
+          label="Módulos na Trilha"
           value={stats?.totalMaterials ?? 0}
           bg="bg-orange-50"
         />
       </div>
 
       {/* Track progress or prompt to start */}
-      {!track && !loading && stats && stats.totalMaterials > 0 && (
+      {!track && !loading && (
         <Link href="/simulation" className="block bg-indigo-50 border border-indigo-200 rounded-2xl p-5 hover:bg-indigo-100 transition-all">
           <div className="flex items-center gap-3">
             <Flame className="w-5 h-5 text-indigo-500 flex-shrink-0" />
             <div>
               <p className="font-semibold text-indigo-900 text-sm">Faça o simulado diagnóstico para criar sua trilha</p>
-              <p className="text-xs text-indigo-600 mt-0.5">40 questões · a IA monta sua trilha personalizada automaticamente</p>
+              <p className="text-xs text-indigo-600 mt-0.5">40 questões do banco oficial · a IA monta sua trilha personalizada automaticamente</p>
             </div>
             <ChevronRight className="w-4 h-4 text-indigo-400 ml-auto flex-shrink-0" />
           </div>
         </Link>
       )}
       {track && (
-        <Link href={`/trilha/${track.id}`} className="block bg-white rounded-2xl border border-gray-200 p-5 hover:border-indigo-300 hover:shadow-sm transition-all">
-          <div className="flex items-center justify-between gap-4 mb-3">
+        <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-orange-100 flex items-center justify-center">
                 <Flame className="w-4 h-4 text-orange-500" />
@@ -138,12 +140,9 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="text-xl font-bold text-indigo-600">
-                {track.total > 0 ? Math.round((track.done / track.total) * 100) : 0}%
-              </span>
-              <ChevronRight className="w-4 h-4 text-gray-300" />
-            </div>
+            <span className="text-xl font-bold text-indigo-600 flex-shrink-0">
+              {track.total > 0 ? Math.round((track.done / track.total) * 100) : 0}%
+            </span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-2">
             <div
@@ -151,8 +150,25 @@ export default function DashboardPage() {
               style={{ width: `${track.total > 0 ? (track.done / track.total) * 100 : 0}%` }}
             />
           </div>
-          <p className="text-xs text-gray-400 mt-1.5">{track.done}/{track.total} módulos concluídos</p>
-        </Link>
+          <p className="text-xs text-gray-400">{track.done}/{track.total} módulos concluídos</p>
+          <div className="flex gap-2 pt-1">
+            {track.currentModuleId && (
+              <Link
+                href={`/trilha/${track.id}/modulo/${track.currentModuleId}`}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-xl hover:bg-indigo-700 transition"
+              >
+                <PlayCircle className="w-3.5 h-3.5" />
+                Continuar estudando
+              </Link>
+            )}
+            <Link
+              href={`/trilha/${track.id}`}
+              className="flex items-center justify-center gap-1 px-3 py-2 border border-gray-200 text-gray-600 text-xs font-medium rounded-xl hover:bg-gray-50 transition"
+            >
+              Ver trilha <ChevronRight className="w-3 h-3" />
+            </Link>
+          </div>
+        </div>
       )}
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -163,7 +179,7 @@ export default function DashboardPage() {
             <TrendingUp className="w-5 h-5 text-gray-400" />
           </div>
           {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={180}>
+            <ResponsiveContainer width="100%" height={220}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
@@ -264,7 +280,7 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         {[
-          { href: "/upload", label: "Enviar PDF", color: "bg-indigo-600" },
+          { href: "/trilha", label: "Trilha de Estudos", color: "bg-indigo-600" },
           { href: "/simulation", label: "Novo Simulado", color: "bg-green-600" },
           { href: "/study-plan", label: "Plano de Estudos", color: "bg-orange-600" },
         ].map(({ href, label, color }) => (
@@ -284,14 +300,14 @@ export default function DashboardPage() {
   );
 }
 
-function StatCard({ icon, label, value, bg }: { icon: React.ReactNode; label: string; value: string | number; bg: string }) {
+function StatCard({ icon, label, value, bg, highlight }: { icon: React.ReactNode; label: string; value: string | number; bg: string; highlight?: boolean }) {
   return (
-    <div className="bg-white rounded-2xl p-5 border border-gray-200">
-      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-3", bg)}>
+    <div className={cn("rounded-2xl p-6 border", highlight ? "bg-green-50 border-green-200" : "bg-white border-gray-200")}>
+      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center mb-4", bg)}>
         {icon}
       </div>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+      <p className={cn("text-3xl font-bold", highlight ? "text-green-700" : "text-gray-900")}>{value}</p>
+      <p className="text-sm text-gray-500 mt-1">{label}</p>
     </div>
   );
 }

@@ -24,18 +24,26 @@ export async function POST(
       status: { in: ["UNLOCKED", "COMPLETED"] },
     },
     include: {
+      adminModule: {
+        include: {
+          questions: {
+            where: { isActive: true },
+            select: {
+              id: true, statement: true, imageUrl: true,
+              alternativeA: true, alternativeB: true, alternativeC: true, alternativeD: true,
+              difficulty: true, syllabusRef: true,
+            },
+            orderBy: { orderIndex: "asc" },
+          },
+        },
+      },
       chapter: {
         include: {
           questions: {
             select: {
-              id: true,
-              statement: true,
-              alternativeA: true,
-              alternativeB: true,
-              alternativeC: true,
-              alternativeD: true,
-              difficulty: true,
-              syllabusRef: true,
+              id: true, statement: true,
+              alternativeA: true, alternativeB: true, alternativeC: true, alternativeD: true,
+              difficulty: true, syllabusRef: true,
             },
           },
           material: { select: { id: true, type: true, filePath: true } },
@@ -45,6 +53,25 @@ export async function POST(
   });
 
   if (!mod) return NextResponse.json({ error: "Módulo não encontrado ou bloqueado." }, { status: 404 });
+
+  // ── Admin module path ────────────────────────────────────────────────────
+  if (mod.adminModule) {
+    const adminQs = mod.adminModule.questions;
+    if (adminQs.length < 1) return NextResponse.json({ error: "Módulo sem questões cadastradas pelo admin." }, { status: 404 });
+    const picked = [...adminQs].sort(() => Math.random() - 0.5).slice(0, Math.min(10, adminQs.length));
+    return NextResponse.json({
+      questions: picked.map((q) => ({ ...q, source: "admin" })),
+      moduleTitle: mod.title,
+      chapterContent: mod.adminModule.summary,
+      chapterId: mod.adminModule.id,
+      materialUrl: mod.adminModule.materialUrl ?? null,
+      pdfUrl: null,
+      startPage: null,
+      endPage: null,
+    });
+  }
+
+  if (!mod.chapter) return NextResponse.json({ error: "Módulo sem conteúdo." }, { status: 404 });
 
   let questions = mod.chapter.questions;
 

@@ -13,7 +13,6 @@ import {
   Flag,
   BookOpen,
   Sparkles,
-  Brain,
   ListChecks,
   Shuffle,
 } from "lucide-react";
@@ -21,7 +20,9 @@ import { cn } from "@/lib/utils";
 
 interface Question {
   id: string;
+  source?: "admin" | "ai";
   statement: string;
+  imageUrl?: string | null;
   alternativeA: string;
   alternativeB: string;
   alternativeC: string;
@@ -53,8 +54,7 @@ const DIFFICULTY_COLOR = {
 };
 
 const GEN_STEPS = [
-  { icon: BookOpen,   label: "Analisando materiais",         detail: "Verificando capítulos e conteúdo dos PDFs enviados..." },
-  { icon: Brain,      label: "Gerando questões com IA",      detail: "GPT-4o criando questões no estilo oficial CTFL..." },
+  { icon: BookOpen,   label: "Acessando banco de questões",  detail: "Carregando questões do banco oficial CTFL..." },
   { icon: ListChecks, label: "Aplicando distribuição CTFL",  detail: "Balanceando capítulos conforme syllabus v4.0 (K-levels)..." },
   { icon: Shuffle,    label: "Montando o simulado",          detail: "Selecionando e embaralhando as 40 questões finais..." },
 ];
@@ -120,8 +120,8 @@ export default function SimulationPage() {
     if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current);
     elapsedTimerRef.current = setInterval(() => setGenElapsed((s) => s + 1), 1000);
 
-    // Animate through steps: 15% → 35% → 65% → 90% of a ~90s estimate
-    const durations = [8000, 40000, 25000, 10000];
+    // Animate through steps quickly — bank query is fast (no AI)
+    const durations = [600, 800, 600, 400];
     let cur = 0;
     const advance = () => {
       cur++;
@@ -192,6 +192,7 @@ export default function SimulationPage() {
       body: JSON.stringify({
         answers: questions.map((q) => ({
           questionId: q.id,
+          source: q.source ?? "ai",
           selectedAnswer: answers[q.id] || "",
         })),
         timeSpentSec: elapsed,
@@ -201,11 +202,11 @@ export default function SimulationPage() {
     const data = await res.json();
     if (res.ok) {
       localStorage.removeItem(DRAFT_KEY);
-      if (data.pathsCreated > 0) {
-        router.push("/trilha");
-      } else {
-        router.push(`/results/${data.simulationId}`);
+      if (flagged.size > 0) {
+        localStorage.setItem(`ctfl-flags-${data.simulationId}`, JSON.stringify([...flagged]));
       }
+      const suffix = data.pathsCreated > 0 ? "?newTrack=true" : "";
+      router.push(`/results/${data.simulationId}${suffix}`);
     } else {
       setError(data.error || "Erro ao enviar simulado.");
       setPhase("running");
@@ -250,7 +251,7 @@ export default function SimulationPage() {
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <div>
                 <p className="font-medium">{error}</p>
-                <p className="text-xs mt-1">Faça upload de um material antes de iniciar o simulado.</p>
+                <p className="text-xs mt-1 text-red-600/80">Aguarde o administrador adicionar questões ao banco para continuar.</p>
               </div>
             </div>
           )}
@@ -296,13 +297,13 @@ export default function SimulationPage() {
       <div className="max-w-lg mx-auto space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Preparando Simulado</h1>
-          <p className="text-gray-500 text-sm mt-1">A IA está gerando questões com base nos seus materiais.</p>
+          <p className="text-gray-500 text-sm mt-1">Selecionando questões do banco oficial CTFL.</p>
         </div>
         <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-2xl p-7 space-y-5">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-indigo-700 font-medium">
               <Sparkles className="w-4 h-4 animate-pulse" />
-              Gerando com GPT-4o
+              Preparando simulado
             </div>
             <span className="text-xs text-gray-400 tabular-nums">{formatSec(genElapsed)}</span>
           </div>
@@ -386,166 +387,196 @@ export default function SimulationPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
-      {/* Header */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className={cn(
-            "flex items-center gap-1.5 text-sm font-bold tabular-nums px-2 py-1 rounded-lg",
-            timeCritical ? "bg-red-100 text-red-700" :
-            timeWarning  ? "bg-yellow-100 text-yellow-700" :
-                           "text-gray-700"
-          )}>
-            <Clock className="w-4 h-4" />
-            {formatCountdown(elapsed)}
-          </div>
-          <div className="text-sm text-gray-500">
-            {answered}/{questions.length} respondidas
-          </div>
+    <div className="max-w-7xl mx-auto">
+      {/* Top bar — full width */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-3 flex items-center gap-4 mb-4">
+        <div className={cn(
+          "flex items-center gap-1.5 text-sm font-bold tabular-nums px-3 py-1.5 rounded-lg flex-shrink-0",
+          timeCritical ? "bg-red-100 text-red-700" :
+          timeWarning  ? "bg-yellow-100 text-yellow-700" :
+                         "bg-gray-50 text-gray-700"
+        )}>
+          <Clock className="w-4 h-4" />
+          {formatCountdown(elapsed)}
         </div>
-
-        <div className="flex-1 max-w-xs">
+        <div className="flex-1">
           <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-indigo-500 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
+            <div className="h-full bg-indigo-500 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
           </div>
         </div>
-
-        <button
-          onClick={() => setShowMap(!showMap)}
-          className="text-sm text-indigo-600 font-medium hover:underline"
-        >
-          {showMap ? "Fechar mapa" : "Ver mapa"}
-        </button>
-      </div>
-
-      {/* Question map */}
-      {showMap && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-5">
-          <p className="text-sm font-medium text-gray-700 mb-3">Mapa de questões</p>
-          <div className="grid grid-cols-8 sm:grid-cols-10 gap-2">
-            {questions.map((q, i) => (
-              <button
-                key={q.id}
-                onClick={() => { setCurrentIndex(i); setShowMap(false); }}
-                className={cn(
-                  "w-8 h-8 rounded-lg text-xs font-medium transition",
-                  i === currentIndex ? "bg-indigo-600 text-white" :
-                  answers[q.id] ? "bg-green-100 text-green-700" :
-                  flagged.has(q.id) ? "bg-yellow-100 text-yellow-700" :
-                  "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                )}
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-4 mt-3 text-xs text-gray-500">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-green-100 inline-block" /> Respondida</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-yellow-100 inline-block" /> Marcada</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-gray-100 inline-block" /> Pendente</span>
-          </div>
-        </div>
-      )}
-
-      {/* Question */}
-      {current && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <div className="flex items-start justify-between gap-4 mb-5">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-medium text-gray-400">
-                  Questão {currentIndex + 1} de {questions.length}
-                </span>
-                <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", DIFFICULTY_COLOR[current.difficulty])}>
-                  {DIFFICULTY_LABEL[current.difficulty]}
-                </span>
-                {current.syllabusRef && (
-                  <span className="text-xs text-gray-400 flex items-center gap-1">
-                    <BookOpen className="w-3 h-3" /> {current.syllabusRef}
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-gray-500">{current.chapterTitle}</p>
-            </div>
-            <button
-              onClick={() => {
-                setFlagged((prev) => {
-                  const next = new Set(prev);
-                  next.has(current.id) ? next.delete(current.id) : next.add(current.id);
-                  return next;
-                });
-              }}
-              className={cn(
-                "flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition",
-                flagged.has(current.id)
-                  ? "bg-yellow-100 text-yellow-600"
-                  : "bg-gray-100 text-gray-400 hover:bg-yellow-50 hover:text-yellow-500"
-              )}
-            >
-              <Flag className="w-4 h-4" />
-            </button>
-          </div>
-
-          <p className="font-medium text-gray-900 mb-5 leading-relaxed">{current.statement}</p>
-
-          <div className="space-y-3">
-            {(["A", "B", "C", "D"] as const).map((key) => {
-              const text = current[`alternative${key}` as keyof typeof current] as string;
-              const selected = answers[current.id] === key;
-              return (
-                <button
-                  key={key}
-                  onClick={() => setAnswers((prev) => ({ ...prev, [current.id]: key }))}
-                  className={cn(
-                    "w-full flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all",
-                    selected
-                      ? "border-indigo-500 bg-indigo-50"
-                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                  )}
-                >
-                  <span className={cn(
-                    "w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5",
-                    selected ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600"
-                  )}>
-                    {key}
-                  </span>
-                  <span className="text-sm text-gray-700 leading-relaxed">{text}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Navigation */}
-      <div className="flex items-center justify-between gap-3">
-        <button
-          onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-          disabled={currentIndex === 0}
-          className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
-        >
-          <ChevronLeft className="w-4 h-4" /> Anterior
-        </button>
-
-        {currentIndex < questions.length - 1 ? (
-          <button
-            onClick={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
-            className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
-          >
-            Próxima <ChevronRight className="w-4 h-4" />
-          </button>
-        ) : (
+        <span className="text-sm text-gray-500 flex-shrink-0">{answered}/{questions.length}</span>
+        {currentIndex === questions.length - 1 && (
           <button
             onClick={handleSubmit}
-            className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition"
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition flex-shrink-0"
           >
             <CheckCircle2 className="w-4 h-4" />
-            Entregar Simulado
+            <span className="hidden sm:inline">Entregar</span>
           </button>
         )}
+      </div>
+
+      {/* 2-column layout */}
+      <div className="flex gap-4 items-start">
+        {/* Left panel — question map + navigation */}
+        <div className="hidden lg:flex flex-col gap-3 w-56 flex-shrink-0 sticky top-4">
+          <div className="bg-white rounded-2xl border border-gray-200 p-4">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Questões</p>
+            <div className="grid grid-cols-5 gap-1.5">
+              {questions.map((q, i) => (
+                <button
+                  key={q.id}
+                  onClick={() => setCurrentIndex(i)}
+                  title={`Q${i + 1}${flagged.has(q.id) ? " (marcada)" : ""}`}
+                  className={cn(
+                    "w-8 h-8 rounded-lg text-xs font-medium transition",
+                    i === currentIndex ? "bg-indigo-600 text-white ring-2 ring-indigo-300" :
+                    answers[q.id] && flagged.has(q.id) ? "bg-yellow-200 text-yellow-800" :
+                    answers[q.id] ? "bg-green-100 text-green-700" :
+                    flagged.has(q.id) ? "bg-yellow-100 text-yellow-700" :
+                    "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  )}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 space-y-1 text-xs text-gray-400">
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-green-100 inline-block flex-shrink-0" /> Respondida</div>
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-yellow-100 inline-block flex-shrink-0" /> Marcada</div>
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-gray-100 inline-block flex-shrink-0" /> Pendente</div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+              disabled={currentIndex === 0}
+              className="flex items-center justify-center gap-2 px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+            >
+              <ChevronLeft className="w-4 h-4" /> Anterior
+            </button>
+            <button
+              onClick={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
+              disabled={currentIndex === questions.length - 1}
+              className="flex items-center justify-center gap-2 px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+            >
+              Próxima <ChevronRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="flex items-center justify-center gap-2 px-3 py-2.5 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition"
+            >
+              <CheckCircle2 className="w-4 h-4" /> Entregar
+            </button>
+          </div>
+        </div>
+
+        {/* Right panel — current question */}
+        <div className="flex-1 min-w-0 space-y-4">
+          {/* Mobile question map toggle */}
+          <div className="lg:hidden">
+            <button onClick={() => setShowMap(!showMap)} className="text-sm text-indigo-600 font-medium hover:underline">
+              {showMap ? "Fechar mapa" : "Ver mapa de questões"}
+            </button>
+            {showMap && (
+              <div className="bg-white rounded-2xl border border-gray-200 p-4 mt-2">
+                <div className="grid grid-cols-8 sm:grid-cols-10 gap-2">
+                  {questions.map((q, i) => (
+                    <button
+                      key={q.id}
+                      onClick={() => { setCurrentIndex(i); setShowMap(false); }}
+                      className={cn(
+                        "w-8 h-8 rounded-lg text-xs font-medium transition",
+                        i === currentIndex ? "bg-indigo-600 text-white" :
+                        answers[q.id] ? "bg-green-100 text-green-700" :
+                        flagged.has(q.id) ? "bg-yellow-100 text-yellow-700" :
+                        "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      )}
+                    >{i + 1}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Question card */}
+          {current && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <div className="flex items-start justify-between gap-4 mb-5">
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-xs font-medium text-gray-400">Questão {currentIndex + 1} de {questions.length}</span>
+                    <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", DIFFICULTY_COLOR[current.difficulty])}>
+                      {DIFFICULTY_LABEL[current.difficulty]}
+                    </span>
+                    {current.syllabusRef && (
+                      <span className="text-xs text-gray-400 hidden sm:flex items-center gap-1">
+                        <BookOpen className="w-3 h-3" /> {current.syllabusRef}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500">{current.chapterTitle}</p>
+                </div>
+                <button
+                  onClick={() => setFlagged((prev) => { const n = new Set(prev); n.has(current.id) ? n.delete(current.id) : n.add(current.id); return n; })}
+                  className={cn(
+                    "flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition",
+                    flagged.has(current.id) ? "bg-yellow-100 text-yellow-600" : "bg-gray-100 text-gray-400 hover:bg-yellow-50 hover:text-yellow-500"
+                  )}
+                >
+                  <Flag className="w-4 h-4" />
+                </button>
+              </div>
+
+              <p className="font-medium text-gray-900 mb-5 leading-relaxed text-base">{current.statement}</p>
+              {current.imageUrl && (
+                <img src={current.imageUrl} alt="Imagem da questão" className="mb-5 max-h-72 rounded-xl border border-gray-200 object-contain w-full" />
+              )}
+
+              <div className="space-y-3">
+                {(["A", "B", "C", "D"] as const).map((key) => {
+                  const text = current[`alternative${key}` as keyof typeof current] as string;
+                  const sel = answers[current.id] === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setAnswers((prev) => ({ ...prev, [current.id]: key }))}
+                      className={cn(
+                        "w-full flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all",
+                        sel ? "border-indigo-500 bg-indigo-50" : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                      )}
+                    >
+                      <span className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5", sel ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600")}>
+                        {key}
+                      </span>
+                      <span className="text-sm text-gray-700 leading-relaxed">{text}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Mobile navigation */}
+          <div className="flex items-center justify-between gap-3 lg:hidden">
+            <button onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))} disabled={currentIndex === 0}
+              className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition">
+              <ChevronLeft className="w-4 h-4" /> Anterior
+            </button>
+            {currentIndex < questions.length - 1 ? (
+              <button onClick={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
+                className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+                Próxima <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button onClick={handleSubmit}
+                className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition">
+                <CheckCircle2 className="w-4 h-4" /> Entregar Simulado
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
