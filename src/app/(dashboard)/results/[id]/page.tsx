@@ -159,11 +159,16 @@ export default function ResultsPage() {
   // Map: adminModuleId → { pathId, moduleId }
   const [moduleMap, setModuleMap] = useState<Record<string, { pathId: string; moduleId: string }>>({});
   const [flagged, setFlagged] = useState<Set<string>>(new Set());
+  const [simPassThreshold, setSimPassThreshold] = useState(65);
 
   useEffect(() => {
     fetch(`/api/simulations?id=${id}`)
       .then((r) => r.json())
       .then((d) => { setData(d); setLoading(false); });
+    fetch("/api/settings")
+      .then((r) => r.ok ? r.json() : null)
+      .then((s) => { if (s?.SIMULATION_PASS_THRESHOLD) setSimPassThreshold(s.SIMULATION_PASS_THRESHOLD); })
+      .catch(() => {});
   }, [id]);
 
   // Load flags saved by simulation page
@@ -215,7 +220,7 @@ export default function ResultsPage() {
   if (!data) return <p className="text-gray-500">Simulado não encontrado.</p>;
 
   const badge = getScoreBadge(data.percentage);
-  const approved = data.percentage >= 65; // CTFL oficial: 26/40 = 65%
+  const approved = data.percentage >= simPassThreshold;
 
   const filteredAnswers = data.answers.filter((a) => {
     if (filter === "correct") return a.isCorrect;

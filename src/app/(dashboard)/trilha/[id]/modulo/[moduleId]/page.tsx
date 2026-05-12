@@ -89,6 +89,7 @@ export default function ModulePage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [chapterId, setChapterId] = useState("");
+  const [passThreshold, setPassThreshold] = useState(70);
 
   const loadQuestions = useCallback(async (forceNew = false) => {
     setPhase("loading");
@@ -142,6 +143,10 @@ export default function ModulePage() {
 
   useEffect(() => {
     loadQuestions();
+    fetch("/api/settings")
+      .then((r) => r.ok ? r.json() : null)
+      .then((s) => { if (s?.MODULE_PASS_THRESHOLD) setPassThreshold(s.MODULE_PASS_THRESHOLD); })
+      .catch(() => {});
   }, [loadQuestions]);
 
   // Persist quiz progress to localStorage while answering
@@ -227,7 +232,7 @@ export default function ModulePage() {
           <div className="flex-1 min-w-0 space-y-4">
             <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-sm text-amber-800">
               <BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <span>Leia o conteúdo antes de responder. Você precisa de <strong>70%</strong> de acertos para avançar.</span>
+              <span>Leia o conteúdo antes de responder. Você precisa de <strong>{passThreshold}%</strong> de acertos para avançar.</span>
             </div>
 
             {pdfUrl && startPage && (
@@ -300,7 +305,7 @@ export default function ModulePage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-600 flex-shrink-0">3</span>
-                  <span>Acerte 70% para avançar</span>
+                  <span>Acerte {passThreshold}% para avançar</span>
                 </div>
               </div>
               <button
@@ -376,7 +381,7 @@ export default function ModulePage() {
             </p>
             <p className={cn("text-sm mt-1", passed ? "text-green-600" : "text-red-600")}>
               {result.correct} de {result.total} corretas
-              {passed ? " · Próximo módulo desbloqueado!" : " · Precisa de 70% para avançar"}
+              {passed ? " · Próximo módulo desbloqueado!" : ` · Precisa de ${passThreshold}% para avançar`}
             </p>
           </div>
         </div>
