@@ -30,6 +30,9 @@
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.6.0"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "overrides": {
     "pdfjs-dist": "2.16.105"
   },
