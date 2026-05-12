@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { enrichChapterContent } from "@/lib/enrich-content";
 import { generateQuestionsForChapter } from "@/lib/generate-questions";
+import { getSettings } from "@/lib/settings";
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -56,9 +57,10 @@ export async function POST(
 
   // ── Admin module path ────────────────────────────────────────────────────
   if (mod.adminModule) {
+    const settings = await getSettings();
     const adminQs = mod.adminModule.questions;
     if (adminQs.length < 1) return NextResponse.json({ error: "Módulo sem questões cadastradas pelo admin." }, { status: 404 });
-    const picked = [...adminQs].sort(() => Math.random() - 0.5).slice(0, Math.min(10, adminQs.length));
+    const picked = [...adminQs].sort(() => Math.random() - 0.5).slice(0, Math.min(settings.MODULE_QUIZ_QUESTION_COUNT, adminQs.length));
     return NextResponse.json({
       questions: picked.map((q) => ({ ...q, source: "admin" })),
       moduleTitle: mod.title,
@@ -75,8 +77,9 @@ export async function POST(
 
   let questions = mod.chapter.questions;
 
+  const settings = await getSettings();
   // Generate questions on first use if chapter has none
-  if (questions.length < 10) {
+  if (questions.length < settings.MODULE_QUIZ_QUESTION_COUNT) {
     await generateQuestionsForChapter(
       mod.chapter.id,
       mod.title,
@@ -101,12 +104,11 @@ export async function POST(
     questions = fresh;
   }
 
-  if (questions.length < 10) {
+  if (questions.length < settings.MODULE_QUIZ_QUESTION_COUNT) {
     return NextResponse.json({ error: "Não foi possível gerar questões suficientes." }, { status: 500 });
   }
 
-  // Pick 10 random questions
-  const picked = [...questions].sort(() => Math.random() - 0.5).slice(0, 10);
+  const picked = [...questions].sort(() => Math.random() - 0.5).slice(0, settings.MODULE_QUIZ_QUESTION_COUNT);
 
   // Enrich chapter content on-the-fly if it's still plain text (no markdown markers)
   let chapterContent = mod.chapter.content ?? "";

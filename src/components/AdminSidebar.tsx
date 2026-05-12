@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, BookOpen, HelpCircle, Users, LogOut, ShieldCheck, ArrowLeft, Upload } from "lucide-react";
+import { LayoutDashboard, BookOpen, HelpCircle, Users, LogOut, ShieldCheck, ArrowLeft, Upload, Settings2 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Visão Geral", icon: LayoutDashboard, exact: true },
   { href: "/admin/modules", label: "Módulos", icon: BookOpen },
   { href: "/admin/questions", label: "Questões", icon: HelpCircle },
   { href: "/admin/users", label: "Usuários", icon: Users },
+  { href: "/admin/settings", label: "Configurações", icon: Settings2 },
 ];
 
 const toolItems = [

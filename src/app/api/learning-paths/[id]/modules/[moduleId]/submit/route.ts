@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getSettings } from "@/lib/settings";
 
 export const dynamic = 'force-dynamic';
 
@@ -135,10 +136,11 @@ async function finishAttempt(
   userId: string,
   evaluated: unknown[]
 ) {
+  const settings = await getSettings();
   const total = evaluated.length;
   const correct = (evaluated as { correct: boolean }[]).filter((e) => e.correct).length;
   const score = total > 0 ? Math.round((correct / total) * 100) : 0;
-  const passed = score >= 70;
+  const passed = score >= settings.MODULE_PASS_THRESHOLD;
 
   await prisma.moduleAttempt.create({
     data: { moduleId, userId, score, passed, answers: evaluated as object[] },

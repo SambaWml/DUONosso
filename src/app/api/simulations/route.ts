@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import { logger } from "@/lib/logger";
 import { rebuildUnifiedTrack } from "@/lib/unified-track";
 import { ensureQuestionsForUser } from "@/lib/generate-questions";
+import { getSettings } from "@/lib/settings";
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -281,12 +282,14 @@ Formato: Markdown estruturado, objetivo e motivador. Use emojis. Idioma: Portugu
   return { pathsCreated, studyPlanCreated: true };
 }
 
-// GET random 40 questions for simulation — prefers AdminQuestion bank, falls back to AI
+// GET random N questions for simulation — prefers AdminQuestion bank, falls back to AI
 export async function PUT(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { count = 40 } = await request.json().catch(() => ({}));
+  const settings = await getSettings();
+  const bodyCount = await request.json().catch(() => ({})) as { count?: number };
+  const count = bodyCount.count ?? settings.SIMULATION_QUESTION_COUNT;
 
   // ── Admin question bank (preferred) ────────────────────────────────────────
   const adminQuestions = await prisma.adminQuestion.findMany({
@@ -299,7 +302,7 @@ export async function PUT(request: NextRequest) {
     },
   });
 
-  if (adminQuestions.length >= 10) {
+  if (adminQuestions.length >= settings.MIN_QUESTIONS_FOR_SIMULATION) {
     const byCtfl = new Map<number, typeof adminQuestions>();
     for (let i = 1; i <= 6; i++) byCtfl.set(i, []);
     for (const q of adminQuestions) byCtfl.get(q.adminModule.ctflChapter)!.push(q);
@@ -345,7 +348,7 @@ export async function PUT(request: NextRequest) {
     },
   });
 
-  if (allQuestions.length < 10) {
+  if (allQuestions.length < settings.MIN_QUESTIONS_FOR_SIMULATION) {
     return NextResponse.json(
       { error: `Banco de questões insuficiente (${allQuestions.length} disponíveis). O administrador precisa adicionar mais questões para iniciar o simulado.` },
       { status: 400 }

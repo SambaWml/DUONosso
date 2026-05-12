@@ -35,7 +35,7 @@ interface Question {
 
 type Phase = "start" | "generating" | "running" | "submitting" | "error";
 
-const TOTAL_SECONDS = 65 * 60;
+const DEFAULT_totalSeconds = 65 * 60;
 const DRAFT_KEY = "ctfl-sim-draft";
 
 interface SimDraft {
@@ -67,6 +67,8 @@ export default function SimulationPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState("");
+  const [totalSeconds, setTotalSeconds] = useState(DEFAULT_totalSeconds);
+  const [simQuestionCount, setSimQuestionCount] = useState(40);
   const [flagged, setFlagged] = useState<Set<string>>(new Set());
   const [showMap, setShowMap] = useState(false);
   const [genStep, setGenStep] = useState(0);
@@ -76,8 +78,18 @@ export default function SimulationPage() {
 
   const [draft, setDraft] = useState<SimDraft | null>(null);
 
-  // Load draft from localStorage after mount (client-side only)
+  // Load settings and draft from server/localStorage after mount
   useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.ok ? r.json() : null)
+      .then((s) => {
+        if (s) {
+          if (s.SIMULATION_TIME_LIMIT_MINUTES) setTotalSeconds(s.SIMULATION_TIME_LIMIT_MINUTES * 60);
+          if (s.SIMULATION_QUESTION_COUNT) setSimQuestionCount(s.SIMULATION_QUESTION_COUNT);
+        }
+      })
+      .catch(() => {});
+
     try {
       const raw = localStorage.getItem(DRAFT_KEY);
       if (!raw) return;
@@ -97,22 +109,22 @@ export default function SimulationPage() {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
   }, [phase, questions, answers, currentIndex, elapsed]);
 
-  // Timer — counts up, but we show countdown from 65min
+  // Timer — counts up, but we show countdown from the configured limit
   useEffect(() => {
     if (phase !== "running") return;
     const interval = setInterval(() => {
       setElapsed((e) => {
-        if (e + 1 >= TOTAL_SECONDS) {
+        if (e + 1 >= totalSeconds) {
           clearInterval(interval);
           handleSubmit();
-          return TOTAL_SECONDS;
+          return totalSeconds;
         }
         return e + 1;
       });
     }, 1000);
     return () => clearInterval(interval);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
+  }, [phase, totalSeconds]);
 
   function startGenProgress() {
     setGenStep(0);
@@ -157,7 +169,7 @@ export default function SimulationPage() {
     const res = await fetch("/api/simulations", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ count: 40 }),
+      body: JSON.stringify({ count: simQuestionCount }),
     });
     const data = await res.json();
     stopGenProgress();
@@ -214,14 +226,14 @@ export default function SimulationPage() {
   }
 
   function formatCountdown(s: number) {
-    const remaining = Math.max(0, TOTAL_SECONDS - s);
+    const remaining = Math.max(0, totalSeconds - s);
     const m = Math.floor(remaining / 60);
     const sec = remaining % 60;
     return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   }
 
-  const timeWarning = elapsed >= TOTAL_SECONDS - 10 * 60; // últimos 10min
-  const timeCritical = elapsed >= TOTAL_SECONDS - 5 * 60;  // últimos 5min
+  const timeWarning = elapsed >= totalSeconds - 10 * 60; // últimos 10min
+  const timeCritical = elapsed >= totalSeconds - 5 * 60;  // últimos 5min
 
   const current = questions[currentIndex];
   const answered = Object.keys(answers).length;

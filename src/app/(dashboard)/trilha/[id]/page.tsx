@@ -35,8 +35,13 @@ export default function PathPage() {
   const router = useRouter();
   const [path, setPath] = useState<LearningPath | null>(null);
   const [loading, setLoading] = useState(true);
+  const [moduleDurationMin, setModuleDurationMin] = useState(30);
 
   useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.ok ? r.json() : null)
+      .then((s) => { if (s?.ESTIMATED_MODULE_DURATION_MINUTES) setModuleDurationMin(s.ESTIMATED_MODULE_DURATION_MINUTES); })
+      .catch(() => {});
     fetch(`/api/learning-paths/${id}`)
       .then((r) => r.json())
       .then((data) => { setPath(data); setLoading(false); });
@@ -57,7 +62,8 @@ export default function PathPage() {
   const allDone = done === total && total > 0;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   const remaining = total - done;
-  const estLabel = remaining > 0 ? (remaining * 30 >= 60 ? `~${Math.round((remaining * 30) / 60)}h restantes` : `~${remaining * 30}min restantes`) : null;
+  const estMin = remaining * moduleDurationMin;
+  const estLabel = remaining > 0 ? (estMin >= 60 ? `~${Math.round(estMin / 60)}h restantes` : `~${estMin}min restantes`) : null;
 
   const priorityMods = path.modules.filter((m) => m.isPriority);
   const standardMods = path.modules.filter((m) => !m.isPriority);

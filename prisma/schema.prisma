@@ -333,3 +333,13 @@ model ModuleAttempt {
 
   @@map("module_attempts")
 }
+
+// ─── System-wide configurable settings ───────────────────────────────────────
+
+model SystemConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("system_configs")
+}
