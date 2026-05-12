@@ -1,0 +1,276 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  materials      Material[]
+  simulations    Simulation[]
+  studyPlans     StudyPlan[]
+  learningPaths  LearningPath[]
+  moduleAttempts ModuleAttempt[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Material {
+  id         String         @id @default(cuid())
+  userId     String
+  filename   String
+  fileSize   Int
+  status     MaterialStatus @default(PROCESSING)
+  type       MaterialType   @default(SYLLABUS)
+  totalPages Int?
+  filePath   String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapters      Chapter[]
+  learningPaths LearningPath[]
+
+  @@map("materials")
+}
+
+enum MaterialStatus {
+  PROCESSING
+  READY
+  ERROR
+}
+
+model Chapter {
+  id         String   @id @default(cuid())
+  materialId String
+  title      String
+  content    String   @db.Text
+  orderIndex Int
+  startPage  Int?
+  endPage    Int?
+  createdAt  DateTime @default(now())
+
+  material        Material         @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  questions       Question[]
+  learningModules LearningModule[]
+
+  @@map("chapters")
+}
+
+model Question {
+  id            String     @id @default(cuid())
+  chapterId     String
+  statement     String     @db.Text
+  alternativeA  String     @db.Text
+  alternativeB  String     @db.Text
+  alternativeC  String     @db.Text
+  alternativeD  String     @db.Text
+  correctAnswer String
+  explanation   String     @db.Text
+  explanationA  String     @db.Text
+  explanationB  String     @db.Text
+  explanationC  String     @db.Text
+  explanationD  String     @db.Text
+  difficulty    Difficulty @default(MEDIUM)
+  syllabusRef   String?
+  createdAt     DateTime   @default(now())
+
+  chapter           Chapter            @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  simulationAnswers SimulationAnswer[]
+
+  @@map("questions")
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model Simulation {
+  id             String           @id @default(cuid())
+  userId         String
+  score          Int
+  totalQuestions Int
+  percentage     Float
+  timeSpentSec   Int              @default(0)
+  status         SimulationStatus @default(COMPLETED)
+  createdAt      DateTime         @default(now())
+
+  user    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers SimulationAnswer[]
+
+  @@map("simulations")
+}
+
+enum SimulationStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+model SimulationAnswer {
+  id             String   @id @default(cuid())
+  simulationId   String
+  questionId     String
+  selectedAnswer String
+  isCorrect      Boolean
+  createdAt      DateTime @default(now())
+
+  simulation Simulation @relation(fields: [simulationId], references: [id], onDelete: Cascade)
+  question   Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("simulation_answers")
+}
+
+model StudyPlan {
+  id        String   @id @default(cuid())
+  userId    String
+  content   String   @db.Text
+  weakAreas String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("study_plans")
+}
+
+model SystemLog {
+  id        String   @id @default(cuid())
+  level     LogLevel @default(ERROR)
+  message   String   @db.Text
+  stack     String?  @db.Text
+  route     String?
+  method    String?
+  userId    String?
+  userEmail String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([level])
+  @@index([createdAt])
+  @@map("system_logs")
+}
+
+enum LogLevel {
+  INFO
+  WARN
+  ERROR
+  FATAL
+}
+
+enum MaterialType {
+  SYLLABUS
+  EXAM
+}
+
+enum LearningModuleStatus {
+  LOCKED
+  UNLOCKED
+  COMPLETED
+}
+
+model LearningPath {
+  id         String   @id @default(cuid())
+  userId     String
+  materialId String?
+  title      String
+  createdAt  DateTime @default(now())
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  material Material?        @relation(fields: [materialId], references: [id], onDelete: SetNull)
+  modules  LearningModule[]
+
+  @@map("learning_paths")
+}
+
+model LearningModule {
+  id         String               @id @default(cuid())
+  pathId     String
+  chapterId  String
+  title      String
+  orderIndex Int
+  status     LearningModuleStatus @default(LOCKED)
+  bestScore  Int?
+  createdAt  DateTime             @default(now())
+
+  path     LearningPath    @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  chapter  Chapter         @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  attempts ModuleAttempt[]
+
+  @@index([pathId, orderIndex])
+  @@map("learning_modules")
+}
+
+model ModuleAttempt {
+  id        String   @id @default(cuid())
+  moduleId  String
+  userId    String
+  score     Int
+  passed    Boolean
+  answers   Json
+  createdAt DateTime @default(now())
+
+  module LearningModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("module_attempts")
+}
