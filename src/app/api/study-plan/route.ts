@@ -8,7 +8,7 @@ import { rebuildUnifiedTrack } from "@/lib/unified-track";
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const client = (() => { try { return new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); } catch { return null as unknown as OpenAI; } })();
 
 export async function GET() {
   const session = await auth();

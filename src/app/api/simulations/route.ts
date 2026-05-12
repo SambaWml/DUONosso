@@ -9,7 +9,7 @@ import { ensureQuestionsForUser } from "@/lib/generate-questions";
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = (() => { try { return new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); } catch { return null as unknown as OpenAI; } })();
 
 // CTFL 4.0 official distribution — exact counts for 40 questions
 // Cap 1: 26% = 10q | Cap 2: 17% = 7q | Cap 3: 11% = 4q
