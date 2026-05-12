@@ -543,7 +543,7 @@ export default function SimulationPage() {
 
               <p className="font-medium text-gray-900 mb-5 leading-relaxed text-base">{current.statement}</p>
               {current.imageUrl && (
-                <img src={current.imageUrl} alt="Imagem da questão" className="mb-5 max-h-72 rounded-xl border border-gray-200 object-contain w-full" />
+                <img src={current.imageUrl} alt="Imagem da questão" className="mb-5 max-h-72 rounded-xl border border-gray-200 object-contain w-full" onError={(ev) => { (ev.target as HTMLImageElement).style.display = "none"; }} />
               )}
 
               <div className="space-y-3">

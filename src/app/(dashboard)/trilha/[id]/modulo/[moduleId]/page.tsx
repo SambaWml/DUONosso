@@ -395,7 +395,7 @@ export default function ModulePage() {
                 <div key={i} className="bg-white border border-red-200 rounded-xl p-4 space-y-2">
                   <p className="text-sm font-medium text-gray-900">{e.statement}</p>
                   {e.imageUrl && (
-                    <img src={e.imageUrl} alt="Imagem da questão" className="rounded-lg max-h-48 object-contain w-full border border-gray-200" />
+                    <img src={e.imageUrl} alt="Imagem da questão" className="rounded-lg max-h-48 object-contain w-full border border-gray-200" onError={(ev) => { (ev.target as HTMLImageElement).style.display = "none"; }} />
                   )}
                   {OPTIONS.map((opt) => {
                     const text = e[`alternative${opt}` as keyof EvaluatedAnswer] as string;
@@ -485,7 +485,7 @@ export default function ModulePage() {
           <p className="text-gray-900 font-medium leading-relaxed">{q.statement}</p>
         </div>
         {q.imageUrl && (
-          <img src={q.imageUrl} alt="Imagem da questão" className="rounded-xl border border-gray-200 max-h-64 object-contain w-full" />
+          <img src={q.imageUrl} alt="Imagem da questão" className="rounded-xl border border-gray-200 max-h-64 object-contain w-full" onError={(ev) => { (ev.target as HTMLImageElement).style.display = "none"; }} />
         )}
 
         <div className="space-y-2.5">

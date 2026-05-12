@@ -245,7 +245,7 @@ export function QuestionForm({
                 />
 
                 {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
-                <p className="text-xs text-gray-400">JPG, PNG, GIF ou WebP · máx 5 MB</p>
+                <p className="text-xs text-gray-400">JPG, PNG, GIF ou WebP · máx 2 MB</p>
 
                 {form.imageUrl && (
                   <div className="relative inline-block">
@@ -253,6 +253,7 @@ export function QuestionForm({
                       src={form.imageUrl}
                       alt="preview"
                       className="max-h-40 rounded-xl border border-gray-200 object-contain"
+                      onError={(ev) => { (ev.target as HTMLImageElement).style.display = "none"; }}
                     />
                     <button
                       type="button"

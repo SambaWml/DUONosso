@@ -412,7 +412,7 @@ export default function ResultsPage() {
                 {isOpen && (
                   <div className="px-6 pb-6 space-y-3">
                     {q.imageUrl && (
-                      <img src={q.imageUrl} alt="Imagem da questão" className="rounded-lg max-h-64 object-contain border border-gray-200" />
+                      <img src={q.imageUrl} alt="Imagem da questão" className="rounded-lg max-h-64 object-contain border border-gray-200" onError={(ev) => { (ev.target as HTMLImageElement).style.display = "none"; }} />
                     )}
                     {(["A", "B", "C", "D"] as const).map((altKey) => {
                       const text = q[`alternative${altKey}` as keyof QuestionData] as string;

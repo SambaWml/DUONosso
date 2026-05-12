@@ -134,7 +134,7 @@ export default function AdminSettingsPage() {
               if (!meta) return null;
               const isChanged = values[key] !== meta.default;
               return (
-                <div key={key} className="px-6 py-5 flex items-start justify-between gap-8">
+                <div key={key} className="px-6 py-5 flex items-center gap-6">
                   <div className="flex-1 min-w-0">
                     <label htmlFor={key} className="block text-sm font-semibold text-gray-800">
                       {meta.label}
@@ -148,20 +148,16 @@ export default function AdminSettingsPage() {
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <div className="relative">
-                      <input
-                        id={key}
-                        type="number"
-                        min={meta.min}
-                        max={meta.max}
-                        value={values[key] ?? meta.value}
-                        onChange={(e) => setValues((v) => ({ ...v, [key]: Number(e.target.value) }))}
-                        className="w-24 px-3 py-2 text-sm font-semibold text-right border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 bg-white"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
-                        {meta.unit}
-                      </span>
-                    </div>
+                    <input
+                      id={key}
+                      type="number"
+                      min={meta.min}
+                      max={meta.max}
+                      value={values[key] ?? meta.value}
+                      onChange={(e) => setValues((v) => ({ ...v, [key]: Number(e.target.value) }))}
+                      className="w-20 px-3 py-2 text-sm font-semibold text-center border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 bg-white"
+                    />
+                    <span className="text-xs text-gray-500 font-medium w-12">{meta.unit}</span>
                     <button
                       type="button"
                       onClick={() => reset(key)}
