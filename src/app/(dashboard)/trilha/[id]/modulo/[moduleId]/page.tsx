@@ -27,6 +27,8 @@ interface Question {
   alternativeB: string;
   alternativeC: string;
   alternativeD: string;
+  alternativeE?: string | null;
+  answerCount?: number;
   difficulty: string;
   syllabusRef?: string | null;
 }
@@ -174,16 +176,30 @@ export default function ModulePage() {
   }
 
   function confirmAnswer() {
-    if (!selected) return;
     const q = questions[currentIdx];
-    const newAnswers = [...answers, { questionId: q.id, selected }];
+    const answerCount = q.answerCount ?? 1;
+    const selectedList = selected ? selected.split(",").filter(Boolean) : [];
+    if (selectedList.length !== answerCount) return;
+    const newAnswers = [...answers, { questionId: q.id, selected: selected! }];
     setAnswers(newAnswers);
 
     if (currentIdx < questions.length - 1) {
       setCurrentIdx((i) => i + 1);
       setSelected(null);
     } else {
-      submitAnswers(newAnswers);
+      submitAnswers(newAnswers as { questionId: string; selected: string }[]);
+    }
+  }
+
+  function toggleMultiSelect(opt: string) {
+    const current = selected ? selected.split(",").filter(Boolean) : [];
+    const q = questions[currentIdx];
+    const answerCount = q.answerCount ?? 1;
+    if (current.includes(opt)) {
+      const next = current.filter((v) => v !== opt);
+      setSelected(next.length > 0 ? next.sort().join(",") : null);
+    } else if (current.length < answerCount) {
+      setSelected([...current, opt].sort().join(","));
     }
   }
 
@@ -488,14 +504,23 @@ export default function ModulePage() {
           <img src={q.imageUrl} alt="Imagem da questão" className="rounded-xl border border-gray-200 max-h-64 object-contain w-full" onError={(ev) => { (ev.target as HTMLImageElement).style.display = "none"; }} />
         )}
 
+        {(q.answerCount ?? 1) > 1 && (
+          <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 rounded-lg px-3 py-1.5">
+            Selecione {q.answerCount} respostas ({selected ? selected.split(",").filter(Boolean).length : 0}/{q.answerCount} selecionadas)
+          </p>
+        )}
+
         <div className="space-y-2.5">
-          {OPTIONS.map((opt) => {
-            const text = q[`alternative${opt}` as keyof Question] as string;
-            const isSelected = selected === opt;
+          {(["A","B","C","D","E"] as const).map((opt) => {
+            const text = q[`alternative${opt}` as keyof Question] as string | null | undefined;
+            if (!text) return null;
+            const isMultiple = (q.answerCount ?? 1) > 1;
+            const selectedList = selected ? selected.split(",").filter(Boolean) : [];
+            const isSelected = isMultiple ? selectedList.includes(opt) : selected === opt;
             return (
               <button
                 key={opt}
-                onClick={() => setSelected(opt)}
+                onClick={() => isMultiple ? toggleMultiSelect(opt) : setSelected(opt)}
                 className={cn(
                   "w-full text-left flex items-start gap-3 rounded-xl px-4 py-3 border-2 transition-all",
                   isSelected
@@ -505,7 +530,8 @@ export default function ModulePage() {
               >
                 <span
                   className={cn(
-                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5",
+                    "w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5",
+                    isMultiple ? "rounded-md" : "rounded-full",
                     isSelected ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500"
                   )}
                 >
@@ -520,7 +546,11 @@ export default function ModulePage() {
 
       <button
         onClick={confirmAnswer}
-        disabled={!selected || submitting}
+        disabled={(() => {
+          const answerCount = q.answerCount ?? 1;
+          const selectedList = selected ? selected.split(",").filter(Boolean) : [];
+          return selectedList.length !== answerCount || submitting;
+        })()}
         className="w-full py-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-lg"
       >
         {submitting ? (

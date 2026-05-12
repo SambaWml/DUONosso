@@ -31,7 +31,8 @@ export async function POST(
             where: { isActive: true },
             select: {
               id: true, statement: true, imageUrl: true,
-              alternativeA: true, alternativeB: true, alternativeC: true, alternativeD: true,
+              alternativeA: true, alternativeB: true, alternativeC: true, alternativeD: true, alternativeE: true,
+              correctAnswer: true,
               difficulty: true, syllabusRef: true,
             },
             orderBy: { orderIndex: "asc" },
@@ -62,7 +63,7 @@ export async function POST(
     if (adminQs.length < 1) return NextResponse.json({ error: "Módulo sem questões cadastradas pelo admin." }, { status: 404 });
     const picked = [...adminQs].sort(() => Math.random() - 0.5).slice(0, Math.min(settings.MODULE_QUIZ_QUESTION_COUNT, adminQs.length));
     return NextResponse.json({
-      questions: picked.map((q) => ({ ...q, source: "admin" })),
+      questions: picked.map((q) => ({ ...q, source: "admin", answerCount: q.correctAnswer.split(",").length })),
       moduleTitle: mod.title,
       chapterContent: mod.adminModule.summary,
       chapterId: mod.adminModule.id,

@@ -259,12 +259,14 @@ model AdminQuestion {
   alternativeB  String         @db.Text
   alternativeC  String         @db.Text
   alternativeD  String         @db.Text
+  alternativeE  String?        @db.Text
   correctAnswer String
   explanation   String         @db.Text
   explanationA  String?        @db.Text
   explanationB  String?        @db.Text
   explanationC  String?        @db.Text
   explanationD  String?        @db.Text
+  explanationE  String?        @db.Text
   difficulty    Difficulty     @default(MEDIUM)
   syllabusRef   String?
   orderIndex    Int            @default(0)

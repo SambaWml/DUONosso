@@ -46,9 +46,9 @@ export async function POST(
       where: { id: { in: questionIds }, adminModuleId: mod.adminModuleId },
       select: {
         id: true, correctAnswer: true, explanation: true,
-        explanationA: true, explanationB: true, explanationC: true, explanationD: true,
+        explanationA: true, explanationB: true, explanationC: true, explanationD: true, explanationE: true,
         statement: true, imageUrl: true,
-        alternativeA: true, alternativeB: true, alternativeC: true, alternativeD: true,
+        alternativeA: true, alternativeB: true, alternativeC: true, alternativeD: true, alternativeE: true,
         difficulty: true, syllabusRef: true,
       },
     });
@@ -58,7 +58,9 @@ export async function POST(
       .map((a) => {
         const q = qMap.get(a.questionId);
         if (!q) return null;
-        const correct = q.correctAnswer === a.selected;
+        const correctSet = new Set(q.correctAnswer.split(",").map((s) => s.trim()));
+        const selectedSet = new Set((a.selected ?? "").split(",").map((s) => s.trim()).filter(Boolean));
+        const correct = correctSet.size === selectedSet.size && [...correctSet].every((v) => selectedSet.has(v));
         return {
           questionId: a.questionId,
           selected: a.selected,
@@ -69,12 +71,14 @@ export async function POST(
           explanationB: q.explanationB ?? "",
           explanationC: q.explanationC ?? "",
           explanationD: q.explanationD ?? "",
+          explanationE: q.explanationE ?? "",
           statement: q.statement,
           imageUrl: q.imageUrl ?? null,
           alternativeA: q.alternativeA,
           alternativeB: q.alternativeB,
           alternativeC: q.alternativeC,
           alternativeD: q.alternativeD,
+          alternativeE: q.alternativeE ?? null,
           difficulty: q.difficulty,
           syllabusRef: q.syllabusRef ?? null,
         };

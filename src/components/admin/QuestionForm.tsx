@@ -14,12 +14,14 @@ interface QuestionData {
   alternativeB: string;
   alternativeC: string;
   alternativeD: string;
+  alternativeE?: string | null;
   correctAnswer: string;
   explanation: string;
   explanationA: string | null;
   explanationB: string | null;
   explanationC: string | null;
   explanationD: string | null;
+  explanationE?: string | null;
   difficulty: string;
   syllabusRef: string | null;
   orderIndex: number;
@@ -60,18 +62,20 @@ export function QuestionForm({
     alternativeC: question?.alternativeC ?? "",
     alternativeD: question?.alternativeD ?? "",
     correctAnswer: question?.correctAnswer ?? "A",
+    alternativeE: question?.alternativeE ?? "",
     explanation: question?.explanation ?? "",
     explanationA: question?.explanationA ?? "",
     explanationB: question?.explanationB ?? "",
     explanationC: question?.explanationC ?? "",
     explanationD: question?.explanationD ?? "",
+    explanationE: question?.explanationE ?? "",
     difficulty: question?.difficulty ?? "MEDIUM",
     syllabusRef: question?.syllabusRef ?? "",
     orderIndex: question?.orderIndex ?? 0,
     isActive: question?.isActive ?? true,
   });
 
-  const alts = ["A", "B", "C", "D"] as const;
+  const alts = ["A", "B", "C", "D", "E"] as const;
 
   async function handleImageUpload(file: File) {
     setUploading(true);
@@ -270,48 +274,87 @@ export function QuestionForm({
 
           {/* Alternativas */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
-            <h2 className="font-semibold text-gray-900">Alternativas</h2>
-            <p className="text-xs text-gray-400">Clique no círculo para marcar a correta.</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold text-gray-900">Alternativas</h2>
+                <p className="text-xs text-gray-400">Clique no marcador para definir a(s) correta(s). Múltiplas respostas = clique em mais de uma.</p>
+              </div>
+              {form.correctAnswer.includes(",") && (
+                <span className="text-xs bg-indigo-100 text-indigo-700 font-semibold px-2.5 py-1 rounded-full">
+                  {form.correctAnswer.split(",").length} respostas corretas
+                </span>
+              )}
+            </div>
 
-            {alts.map((alt) => (
-              <div
-                key={alt}
-                className={cn(
-                  "flex gap-3 items-start p-3.5 rounded-xl border-2 transition-colors",
-                  form.correctAnswer === alt ? "border-emerald-400 bg-emerald-50" : "border-gray-100 hover:border-gray-200"
-                )}
-              >
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, correctAnswer: alt })}
+            {alts.map((alt) => {
+              const altKey = `alternative${alt}` as keyof typeof form;
+              const expKey = `explanation${alt}` as keyof typeof form;
+              const altValue = form[altKey] as string;
+              const expValue = form[expKey] as string;
+              const correctList = form.correctAnswer.split(",").map(s => s.trim());
+              const isCorrect = correctList.includes(alt);
+              // E is optional: hide if blank and not currently selected
+              if (alt === "E" && !altValue && !isCorrect) {
+                return (
+                  <button key="E-add" type="button"
+                    onClick={() => setForm({ ...form, alternativeE: " " })}
+                    className="w-full border-2 border-dashed border-gray-200 rounded-xl py-2.5 text-xs text-gray-400 hover:border-indigo-300 hover:text-indigo-500 transition">
+                    + Adicionar alternativa E
+                  </button>
+                );
+              }
+
+              function toggleCorrect() {
+                const list = form.correctAnswer.split(",").map(s => s.trim()).filter(Boolean);
+                if (isCorrect) {
+                  const next = list.filter(v => v !== alt);
+                  setForm({ ...form, correctAnswer: next.length > 0 ? next.sort().join(",") : "A" });
+                } else {
+                  setForm({ ...form, correctAnswer: [...list, alt].sort().join(",") });
+                }
+              }
+
+              return (
+                <div
+                  key={alt}
                   className={cn(
-                    "w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold border-2 transition-colors mt-0.5",
-                    form.correctAnswer === alt
-                      ? "bg-emerald-500 border-emerald-500 text-white"
-                      : "border-gray-300 text-gray-500 hover:border-emerald-400 hover:text-emerald-600"
+                    "flex gap-3 items-start p-3.5 rounded-xl border-2 transition-colors",
+                    isCorrect ? "border-emerald-400 bg-emerald-50" : "border-gray-100 hover:border-gray-200"
                   )}
                 >
-                  {alt}
-                </button>
-                <div className="flex-1 space-y-1.5">
-                  <input
-                    type="text"
-                    value={form[`alternative${alt}` as keyof typeof form] as string}
-                    onChange={(e) => setForm({ ...form, [`alternative${alt}`]: e.target.value })}
-                    required
-                    placeholder={`Alternativa ${alt}`}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                  <input
-                    type="text"
-                    value={form[`explanation${alt}` as keyof typeof form] as string}
-                    onChange={(e) => setForm({ ...form, [`explanation${alt}`]: e.target.value })}
-                    placeholder={`Explicação da alternativa ${alt} (opcional)`}
-                    className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
+                  <button
+                    type="button"
+                    onClick={toggleCorrect}
+                    className={cn(
+                      "w-7 h-7 flex-shrink-0 flex items-center justify-center text-xs font-bold border-2 transition-colors mt-0.5",
+                      form.correctAnswer.includes(",") ? "rounded-md" : "rounded-full",
+                      isCorrect
+                        ? "bg-emerald-500 border-emerald-500 text-white"
+                        : "border-gray-300 text-gray-500 hover:border-emerald-400 hover:text-emerald-600"
+                    )}
+                  >
+                    {alt}
+                  </button>
+                  <div className="flex-1 space-y-1.5">
+                    <input
+                      type="text"
+                      value={altValue}
+                      onChange={(e) => setForm({ ...form, [altKey]: e.target.value })}
+                      required={alt !== "E"}
+                      placeholder={`Alternativa ${alt}${alt === "E" ? " (opcional)" : ""}`}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <input
+                      type="text"
+                      value={expValue}
+                      onChange={(e) => setForm({ ...form, [expKey]: e.target.value })}
+                      placeholder={`Explicação da alternativa ${alt} (opcional)`}
+                      className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Explicação geral */}
@@ -411,7 +454,9 @@ export function QuestionForm({
                 <div className="space-y-2">
                   {alts.map((alt) => {
                     const text = form[`alternative${alt}` as keyof typeof form] as string;
-                    const isCorrect = form.correctAnswer === alt;
+                    if (!text && alt === "E") return null;
+                    const correctList = form.correctAnswer.split(",").map(s => s.trim());
+                    const isCorrect = correctList.includes(alt);
                     return (
                       <div
                         key={alt}
@@ -421,7 +466,8 @@ export function QuestionForm({
                         )}
                       >
                         <span className={cn(
-                          "w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5",
+                          "w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5",
+                          correctList.length > 1 ? "rounded-md" : "rounded-lg",
                           isCorrect ? "bg-emerald-500 text-white" : "bg-gray-200 text-gray-600"
                         )}>
                           {alt}

@@ -17,9 +17,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const body = await req.json();
   const {
     adminModuleId, statement, imageUrl,
-    alternativeA, alternativeB, alternativeC, alternativeD,
+    alternativeA, alternativeB, alternativeC, alternativeD, alternativeE,
     correctAnswer, explanation,
-    explanationA, explanationB, explanationC, explanationD,
+    explanationA, explanationB, explanationC, explanationD, explanationE,
     difficulty, syllabusRef, orderIndex, isActive,
   } = body;
 
@@ -28,9 +28,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     data: {
       adminModuleId, statement, imageUrl: imageUrl || null,
       alternativeA, alternativeB, alternativeC, alternativeD,
+      alternativeE: alternativeE || null,
       correctAnswer, explanation,
       explanationA: explanationA || null, explanationB: explanationB || null,
       explanationC: explanationC || null, explanationD: explanationD || null,
+      explanationE: explanationE || null,
       difficulty, syllabusRef: syllabusRef || null,
       orderIndex: Number(orderIndex ?? 0), isActive,
     },

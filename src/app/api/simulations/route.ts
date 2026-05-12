@@ -104,7 +104,10 @@ export async function POST(request: NextRequest) {
 
   let score = 0;
   const processedAnswers = deduped.map((a) => {
-    const isCorrect = correctMap[a.questionId] === a.selectedAnswer;
+    const correctRaw = correctMap[a.questionId] ?? "";
+    const correctSet = new Set(correctRaw.split(",").map((s) => s.trim()));
+    const selectedSet = new Set((a.selectedAnswer ?? "").split(",").map((s) => s.trim()).filter(Boolean));
+    const isCorrect = correctSet.size === selectedSet.size && [...correctSet].every((v) => selectedSet.has(v));
     if (isCorrect) score++;
     return a.source === "admin"
       ? { adminQuestionId: a.questionId, selectedAnswer: a.selectedAnswer, isCorrect }
@@ -296,7 +299,8 @@ export async function PUT(request: NextRequest) {
     where: { isActive: true },
     select: {
       id: true, statement: true, imageUrl: true,
-      alternativeA: true, alternativeB: true, alternativeC: true, alternativeD: true,
+      alternativeA: true, alternativeB: true, alternativeC: true, alternativeD: true, alternativeE: true,
+      correctAnswer: true,
       difficulty: true, syllabusRef: true,
       adminModule: { select: { id: true, title: true, ctflChapter: true } },
     },
@@ -327,6 +331,8 @@ export async function PUT(request: NextRequest) {
         alternativeB: q.alternativeB,
         alternativeC: q.alternativeC,
         alternativeD: q.alternativeD,
+        alternativeE: q.alternativeE ?? null,
+        answerCount: q.correctAnswer.split(",").length,
         difficulty: q.difficulty,
         syllabusRef: q.syllabusRef,
         chapterId: q.adminModule.id,

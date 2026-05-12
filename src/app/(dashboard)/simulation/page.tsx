@@ -27,6 +27,8 @@ interface Question {
   alternativeB: string;
   alternativeC: string;
   alternativeD: string;
+  alternativeE?: string | null;
+  answerCount?: number;
   difficulty: "EASY" | "MEDIUM" | "HARD";
   syllabusRef: string | null;
   chapterId: string;
@@ -546,20 +548,48 @@ export default function SimulationPage() {
                 <img src={current.imageUrl} alt="Imagem da questão" className="mb-5 max-h-72 rounded-xl border border-gray-200 object-contain w-full" onError={(ev) => { (ev.target as HTMLImageElement).style.display = "none"; }} />
               )}
 
+              {(current.answerCount ?? 1) > 1 && (
+                <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 rounded-lg px-3 py-1.5 mb-3">
+                  {(() => {
+                    const sel = answers[current.id] ?? "";
+                    const count = sel ? sel.split(",").filter(Boolean).length : 0;
+                    return `Selecione ${current.answerCount} respostas (${count}/${current.answerCount} selecionadas)`;
+                  })()}
+                </p>
+              )}
               <div className="space-y-3">
-                {(["A", "B", "C", "D"] as const).map((key) => {
-                  const text = current[`alternative${key}` as keyof typeof current] as string;
-                  const sel = answers[current.id] === key;
+                {(["A", "B", "C", "D", "E"] as const).map((key) => {
+                  const text = current[`alternative${key}` as keyof typeof current] as string | null | undefined;
+                  if (!text) return null;
+                  const isMultiple = (current.answerCount ?? 1) > 1;
+                  const currentAnswer = answers[current.id] ?? "";
+                  const selectedList = currentAnswer ? currentAnswer.split(",").filter(Boolean) : [];
+                  const sel = isMultiple ? selectedList.includes(key) : currentAnswer === key;
+
+                  function handleClick() {
+                    if (!isMultiple) {
+                      setAnswers((prev) => ({ ...prev, [current.id]: key }));
+                      return;
+                    }
+                    const answerCount = current.answerCount ?? 1;
+                    if (sel) {
+                      const next = selectedList.filter((v) => v !== key);
+                      setAnswers((prev) => ({ ...prev, [current.id]: next.sort().join(",") }));
+                    } else if (selectedList.length < answerCount) {
+                      setAnswers((prev) => ({ ...prev, [current.id]: [...selectedList, key].sort().join(",") }));
+                    }
+                  }
+
                   return (
                     <button
                       key={key}
-                      onClick={() => setAnswers((prev) => ({ ...prev, [current.id]: key }))}
+                      onClick={handleClick}
                       className={cn(
                         "w-full flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all",
                         sel ? "border-indigo-500 bg-indigo-50" : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                       )}
                     >
-                      <span className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5", sel ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600")}>
+                      <span className={cn("w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5", isMultiple ? "rounded-md" : "rounded-lg", sel ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600")}>
                         {key}
                       </span>
                       <span className="text-sm text-gray-700 leading-relaxed">{text}</span>
