@@ -16,12 +16,12 @@ export function Header() {
           <span className="font-bold text-gray-900 text-sm">CTFL Smart Prep</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
             <User className="w-4 h-4 text-indigo-600" />
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-red-50"
+            className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-red-50 transition"
           >
             <LogOut className="w-4 h-4 text-gray-500" />
           </button>

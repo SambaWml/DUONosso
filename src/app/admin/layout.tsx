@@ -40,7 +40,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6 xl:p-8">{children}</main>
+        <main className="flex-1 p-4 pb-24 lg:pb-6 lg:p-6 xl:p-8">{children}</main>
       </div>
     </div>
   );

@@ -87,7 +87,7 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Configurações do Sistema</h1>
           <p className="text-sm text-gray-500 mt-1">Ajuste tempos, porcentagens e limites usados em todo o sistema.</p>
@@ -96,7 +96,7 @@ export default function AdminSettingsPage() {
           onClick={save}
           disabled={saving || !isDirty}
           className={cn(
-            "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all",
+            "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex-shrink-0 min-h-[44px]",
             isDirty
               ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
               : "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -134,7 +134,7 @@ export default function AdminSettingsPage() {
               if (!meta) return null;
               const isChanged = values[key] !== meta.default;
               return (
-                <div key={key} className="px-6 py-5 flex items-center gap-6">
+                <div key={key} className="px-4 sm:px-6 py-4 flex flex-wrap items-center gap-3 sm:gap-6">
                   <div className="flex-1 min-w-0">
                     <label htmlFor={key} className="block text-sm font-semibold text-gray-800">
                       {meta.label}

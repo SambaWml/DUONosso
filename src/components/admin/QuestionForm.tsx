@@ -207,17 +207,17 @@ export function QuestionForm({
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1.5">Imagem (opcional)</label>
               <div className="space-y-2">
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors whitespace-nowrap"
+                    className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors whitespace-nowrap flex-shrink-0"
                   >
                     {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                     {uploading ? "Enviando..." : "Enviar arquivo"}
                   </button>
-                  <span className="flex items-center text-xs text-gray-400 px-1">ou</span>
+                  <span className="hidden sm:flex items-center text-xs text-gray-400 px-1">ou</span>
                   <input
                     type="text"
                     value={form.imageUrl}

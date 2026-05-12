@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -9,9 +10,10 @@ import {
   PlayCircle,
   BookOpen,
   Flame,
+  ShieldCheck,
 } from "lucide-react";
 
-const mobileNavItems = [
+const baseNavItems = [
   { href: "/dashboard", label: "Início", icon: LayoutDashboard },
   { href: "/trilha", label: "Trilha", icon: Flame },
   { href: "/simulation", label: "Simulado", icon: PlayCircle },
@@ -19,30 +21,44 @@ const mobileNavItems = [
   { href: "/study-plan", label: "Plano", icon: BookOpen },
 ];
 
+const adminNavItem = { href: "/admin", label: "Admin", icon: ShieldCheck };
+
 export function BottomNav() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as { role?: string } | undefined)?.role === "ADMIN";
+
+  const navItems = isAdmin ? [...baseNavItems, adminNavItem] : baseNavItems;
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 safe-area-pb">
-      <div className="flex items-center justify-around px-2 py-2">
-        {mobileNavItems.map(({ href, label, icon: Icon }) => {
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="flex items-center justify-around px-1 py-2">
+        {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
+          const isAdminItem = href === "/admin";
           return (
             <Link
               key={href}
               href={href}
-              className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-all"
+              className={cn(
+                "flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-all min-h-[44px] justify-center min-w-0",
+                isAdminItem && active && "bg-indigo-600 text-white rounded-xl"
+              )}
             >
               <Icon
                 className={cn(
-                  "w-5 h-5 transition-colors",
-                  active ? "text-indigo-600" : "text-gray-400"
+                  "w-5 h-5 flex-shrink-0 transition-colors",
+                  isAdminItem
+                    ? active ? "text-white" : "text-indigo-500"
+                    : active ? "text-indigo-600" : "text-gray-400"
                 )}
               />
               <span
                 className={cn(
-                  "text-[10px] font-medium",
-                  active ? "text-indigo-600" : "text-gray-500"
+                  "text-xs font-medium leading-tight",
+                  isAdminItem
+                    ? active ? "text-white" : "text-indigo-500"
+                    : active ? "text-indigo-600" : "text-gray-500"
                 )}
               >
                 {label}

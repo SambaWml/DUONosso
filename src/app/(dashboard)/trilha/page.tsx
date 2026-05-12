@@ -102,7 +102,7 @@ export default function TrilhaPage() {
           onClick={handleRebuild}
           disabled={rebuilding}
           title="Atualizar trilha com base no plano de estudos atual"
-          className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 transition flex-shrink-0"
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 transition flex-shrink-0 whitespace-nowrap"
         >
           <RefreshCw className={rebuilding ? "w-3.5 h-3.5 animate-spin" : "w-3.5 h-3.5"} />
           {rebuilding ? "Atualizando..." : "Atualizar trilha"}

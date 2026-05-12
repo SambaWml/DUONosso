@@ -31,25 +31,25 @@ export default async function AdminQuestionsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Questões</h1>
           <p className="text-sm text-gray-400 mt-0.5">{questions.length} no banco · {activeCount} ativas</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Link
             href="/admin/questions/import"
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm min-h-[44px]"
           >
             <Upload className="w-4 h-4" />
-            Importar
+            <span className="hidden sm:inline">Importar</span>
           </Link>
           <Link
             href="/admin/questions/new"
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm min-h-[44px]"
           >
             <Plus className="w-4 h-4" />
-            Nova questão
+            <span className="hidden sm:inline">Nova questão</span>
           </Link>
         </div>
       </div>
@@ -121,7 +121,7 @@ export default async function AdminQuestionsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5">
+                  <div className="flex items-center gap-0.5 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity mt-0.5">
                     <Link
                       href={`/admin/questions/${q.id}?moduleId=${moduleId}`}
                       className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"

@@ -223,7 +223,7 @@ export default function LogsPage() {
                     <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDelete(log.id); }}
-                        className="opacity-0 group-hover:opacity-100 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition"
+                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition"
                       >
                         {deletingId === log.id
                           ? <Loader2 className="w-3.5 h-3.5 animate-spin" />

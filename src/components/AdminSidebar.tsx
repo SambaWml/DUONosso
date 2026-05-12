@@ -106,7 +106,7 @@ export function AdminSidebar() {
       </aside>
 
       {/* Mobile bottom nav */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0f1117] border-t border-white/8 flex items-center justify-around px-2 py-2">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0f1117] border-t border-white/8 flex items-center justify-around px-1 py-2" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)' }}>
         {navItems.map(({ href, label, icon: Icon, exact }) => {
           const active = exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
           return (
@@ -114,15 +114,22 @@ export function AdminSidebar() {
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors",
+                "flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors min-h-[44px] justify-center min-w-0",
                 active ? "text-indigo-400" : "text-gray-600"
               )}
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-[10px] font-medium">{label}</span>
+              <Icon className="w-5 h-5 flex-shrink-0" />
+              <span className="text-xs font-medium leading-tight truncate max-w-[56px] text-center">{label}</span>
             </Link>
           );
         })}
+        <Link
+          href="/dashboard"
+          className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors min-h-[44px] justify-center min-w-0 text-gray-600 hover:text-gray-300"
+        >
+          <ArrowLeft className="w-5 h-5 flex-shrink-0" />
+          <span className="text-xs font-medium leading-tight truncate max-w-[56px] text-center">Sair</span>
+        </Link>
       </nav>
     </>
   );
