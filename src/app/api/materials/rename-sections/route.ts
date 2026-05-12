@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { inferChapterTitle } from "@/lib/enrich-content";
 
+export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
 /** Renames all "Seção N" chapters for the user using GPT-4o content inference. */

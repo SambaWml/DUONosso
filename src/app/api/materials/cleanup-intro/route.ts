@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 // Removes "Introdução" / "__intro__" chapters from existing materials
 // and cleans up learning modules that pointed to them
 export async function POST() {

@@ -6,6 +6,7 @@ import { logger } from "@/lib/logger";
 import { rebuildUnifiedTrack } from "@/lib/unified-track";
 import { ensureQuestionsForUser } from "@/lib/generate-questions";
 
+export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });

@@ -8,6 +8,7 @@ import { enrichChapterContent, inferChapterTitle } from "@/lib/enrich-content";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
+export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 export async function POST(request: NextRequest) {

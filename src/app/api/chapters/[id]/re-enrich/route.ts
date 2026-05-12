@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { enrichChapterContent } from "@/lib/enrich-content";
 
+export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
 export async function POST(

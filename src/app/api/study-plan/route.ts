@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import { logger } from "@/lib/logger";
 import { rebuildUnifiedTrack } from "@/lib/unified-track";
 
+export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });

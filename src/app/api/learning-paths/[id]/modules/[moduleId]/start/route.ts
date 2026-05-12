@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { enrichChapterContent } from "@/lib/enrich-content";
 import { generateQuestionsForChapter } from "@/lib/generate-questions";
 
+export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
 export async function POST(
