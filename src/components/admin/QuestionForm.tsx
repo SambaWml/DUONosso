@@ -137,8 +137,8 @@ export function QuestionForm({
         {/* ── Form ─────────────────────────────────────────────────────────── */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Dados da questão */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-            <h2 className="font-semibold text-gray-900">Dados da questão</h2>
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-6 space-y-4">
+            <h2 className="font-extrabold text-[#1A1B2E]">Dados da questão</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -273,10 +273,10 @@ export function QuestionForm({
           </div>
 
           {/* Alternativas */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-6 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-semibold text-gray-900">Alternativas</h2>
+                <h2 className="font-extrabold text-[#1A1B2E]">Alternativas</h2>
                 <p className="text-xs text-gray-400">Clique no marcador para definir a(s) correta(s). Múltiplas respostas = clique em mais de uma.</p>
               </div>
               {form.correctAnswer.includes(",") && (
@@ -358,8 +358,8 @@ export function QuestionForm({
           </div>
 
           {/* Explicação geral */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-            <h2 className="font-semibold text-gray-900">Explicação geral</h2>
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-6 space-y-4">
+            <h2 className="font-extrabold text-[#1A1B2E]">Explicação geral</h2>
             <textarea
               value={form.explanation}
               onChange={(e) => setForm({ ...form, explanation: e.target.value })}
@@ -405,7 +405,7 @@ export function QuestionForm({
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] overflow-hidden">
               {/* Preview header band */}
               <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 px-6 py-4">
                 <div className="flex items-center justify-between">
