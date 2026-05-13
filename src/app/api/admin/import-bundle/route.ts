@@ -33,7 +33,7 @@ interface ImportModule {
   questions?: ImportQuestion[];
 }
 
-const VALID_ANSWER_RE = /^[A-D]{1,4}$/;
+const VALID_ANSWER_RE = /^[A-Z]+$/;
 const VALID_DIFFS = new Set(["EASY", "MEDIUM", "HARD"]);
 
 export async function POST(req: NextRequest) {

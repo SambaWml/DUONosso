@@ -163,14 +163,14 @@ function download(content: string, filename: string, type: string) {
 
 // ── Component ───────────────────────────────────────────────────────────────
 
-const VALID_ANSWER_RE = /^[A-D]{1,4}$/;
+const VALID_ANSWER_RE = /^[A-Z]+$/;
 const VALID_DIFFICULTIES = new Set(["EASY", "MEDIUM", "HARD"]);
 
 function isValidAnswer(v: string) { return VALID_ANSWER_RE.test((v ?? "").toUpperCase()); }
 
 function validateQ(q: ParsedQuestion): string | null {
   if (!q.statement?.trim()) return "Enunciado obrigatório";
-  if (!isValidAnswer(q.correctAnswer ?? "")) return "correctAnswer deve conter apenas A, B, C e/ou D";
+  if (!isValidAnswer(q.correctAnswer ?? "")) return "correctAnswer obrigatório (ex: A, BD, ACE)";
   return null;
 }
 
@@ -346,7 +346,7 @@ export default function ImportPage() {
               Colunas: <code className="bg-blue-100 px-1 rounded">moduleName</code> (nome exato do módulo já cadastrado),{" "}
               <code className="bg-blue-100 px-1 rounded">statement</code>,{" "}
               <code className="bg-blue-100 px-1 rounded">alternativeA–D</code>,{" "}
-              <code className="bg-blue-100 px-1 rounded">correctAnswer</code> (A/B/C/D ou combinações como BD, AC),{" "}
+              <code className="bg-blue-100 px-1 rounded">correctAnswer</code> (letra(s) da(s) alternativa(s) correta(s), ex: A, BD, ACE),{" "}
               <code className="bg-blue-100 px-1 rounded">explanation</code>,{" "}
               <code className="bg-blue-100 px-1 rounded">difficulty</code> (EASY/MEDIUM/HARD),{" "}
               <code className="bg-blue-100 px-1 rounded">syllabusRef</code>,{" "}
@@ -476,8 +476,7 @@ export default function ImportPage() {
                       <td className="px-4 py-2">
                         <input
                           value={(q.correctAnswer ?? "").toUpperCase()}
-                          onChange={(e) => updateQ(i, "correctAnswer", e.target.value.toUpperCase().replace(/[^A-D]/g, ""))}
-                          maxLength={4}
+                          onChange={(e) => updateQ(i, "correctAnswer", e.target.value.toUpperCase().replace(/[^A-Z]/g, ""))}
                           placeholder="ex: BD"
                           className={cn(
                             "w-16 text-xs font-bold rounded px-1.5 py-0.5 border focus:outline-none focus:ring-1 focus:ring-indigo-300",
@@ -597,8 +596,7 @@ export default function ImportPage() {
                                 <td className="px-4 py-2">
                                   <input
                                     value={(q.correctAnswer ?? "").toUpperCase()}
-                                    onChange={(e) => updateBundleQ(mi, qi, "correctAnswer", e.target.value.toUpperCase().replace(/[^A-D]/g, ""))}
-                                    maxLength={4}
+                                    onChange={(e) => updateBundleQ(mi, qi, "correctAnswer", e.target.value.toUpperCase().replace(/[^A-Z]/g, ""))}
                                     placeholder="ex: BD"
                                     className={cn(
                                       "w-16 text-xs font-bold rounded px-1.5 py-0.5 border focus:outline-none focus:ring-1 focus:ring-indigo-300",

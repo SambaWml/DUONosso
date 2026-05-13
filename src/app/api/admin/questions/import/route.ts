@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Nenhuma questão para importar." }, { status: 400 });
   }
 
-  const VALID_ANSWER_RE = /^[A-D]{1,4}$/;
+  const VALID_ANSWER_RE = /^[A-Z]+$/;
   const VALID_DIFFS = new Set(["EASY", "MEDIUM", "HARD"]);
 
   const errors: string[] = [];
