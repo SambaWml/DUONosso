@@ -50,8 +50,8 @@ export default function AdminPage() {
       sub: "cadastrados",
       href: "/admin/users",
       icon: Users,
-      accent: "from-violet-500 to-violet-600",
-      text: "text-violet-600",
+      accent: "from-indigo-500 to-indigo-600",
+      text: "text-indigo-600",
     },
     {
       label: "Ativos",
@@ -95,7 +95,7 @@ export default function AdminPage() {
     <div className="space-y-8">
       {/* Page title */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Visão Geral</h1>
+        <h1 className="text-2xl font-black text-[#1A1B2E]">Visão Geral</h1>
         <p className="text-sm text-gray-400 mt-0.5">Monitoramento da plataforma em tempo real</p>
       </div>
 
@@ -105,7 +105,7 @@ export default function AdminPage() {
           <Link
             key={label}
             href={href}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-gray-200 transition-all group"
+            className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-5 hover:brightness-98 transition-all group"
           >
             <div className="flex items-start justify-between mb-4">
               <div className={cn("w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center flex-shrink-0", accent)}>
@@ -113,7 +113,7 @@ export default function AdminPage() {
               </div>
               <ArrowUpRight className={cn("w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity", text)} />
             </div>
-            <p className="text-3xl font-bold text-gray-900 leading-none">{value}</p>
+            <p className="text-3xl font-black text-[#1A1B2E] leading-none">{value}</p>
             <p className="text-xs text-gray-400 mt-1.5 font-medium">{label}</p>
             <p className="text-[11px] text-gray-300 mt-0.5">{sub}</p>
           </Link>
@@ -151,13 +151,13 @@ export default function AdminPage() {
       ) : stats && (
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Top missed questions */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] overflow-hidden">
             <div className="flex items-center gap-2.5 px-6 py-4 border-b border-gray-50">
               <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
                 <TrendingDown className="w-4 h-4 text-red-500" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-gray-900">Questões mais erradas</h2>
+                <h2 className="text-sm font-extrabold text-[#1A1B2E]">Questões mais erradas</h2>
                 <p className="text-xs text-gray-400">Por taxa de erro nos simulados</p>
               </div>
             </div>
@@ -201,13 +201,13 @@ export default function AdminPage() {
           </div>
 
           {/* Module completion rates */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] overflow-hidden">
             <div className="flex items-center gap-2.5 px-6 py-4 border-b border-gray-50">
               <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
                 <BarChart3 className="w-4 h-4 text-indigo-500" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-gray-900">Conclusão por módulo</h2>
+                <h2 className="text-sm font-extrabold text-[#1A1B2E]">Conclusão por módulo</h2>
                 <p className="text-xs text-gray-400">% de usuários que completaram</p>
               </div>
             </div>

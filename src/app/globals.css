@@ -1,11 +1,56 @@
 @import "tailwindcss";
 
+/* ── QVenture violet — remaps every indigo-* class in the project ── */
+@theme {
+  --color-indigo-50:  #F4F0FF;
+  --color-indigo-100: #EBE3FF;
+  --color-indigo-200: #D5C5FF;
+  --color-indigo-300: #C4B0FF;
+  --color-indigo-400: #9B85F5;
+  --color-indigo-500: #6C5CE7;
+  --color-indigo-600: #5240C7;
+  --color-indigo-700: #3E2EA0;
+  --color-indigo-800: #2E2280;
+  --color-indigo-900: #1E1660;
+}
+
 :root {
-  --background: #f9fafb;
-  --foreground: #111827;
+  --background: #FFF7EC;
+  --foreground: #1A1B2E;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  overflow-x: hidden;
 }
+
+html {
+  overflow-x: hidden;
+}
+
+/* ── Chunky game button (QVenture style) ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: #5240C7;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #3E2EA0;
+  transition: filter 0.1s, transform 0.08s, box-shadow 0.08s;
+  user-select: none;
+  text-decoration: none;
+}
+.btn-primary:hover  { filter: brightness(1.08); }
+.btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #3E2EA0; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: 0 4px 0 #3E2EA0; transform: none; }

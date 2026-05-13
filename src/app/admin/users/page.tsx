@@ -19,7 +19,7 @@ export default async function AdminUsersPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Usuários</h1>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Usuários</h1>
           <p className="text-sm text-gray-500 mt-0.5">{users.length} cadastrados · {adminCount} admin{adminCount !== 1 ? "s" : ""}</p>
         </div>
       </div>
@@ -31,7 +31,7 @@ export default async function AdminUsersPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/80">

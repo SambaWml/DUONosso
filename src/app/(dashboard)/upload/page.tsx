@@ -115,7 +115,7 @@ export default function UploadPage() {
         </div>
         <button
           onClick={() => router.push("/simulation")}
-          className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+          className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-extrabold text-sm uppercase tracking-wide hover:brightness-105 transition flex items-center justify-center gap-2 shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none"
         >
           <Sparkles className="w-4 h-4" />
           Fazer Simulado Diagnóstico
@@ -133,7 +133,7 @@ export default function UploadPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Upload de Materiais</h1>
+        <h1 className="text-2xl font-black text-[#1A1B2E]">Upload de Materiais</h1>
         <p className="text-gray-500 text-sm mt-1">
           Envie o syllabus e uma prova anterior juntos — processamento em paralelo.
         </p>
@@ -157,7 +157,7 @@ export default function UploadPage() {
       {hasAny && !anyBusy && !allDone && (
         <button
           onClick={handleUpload}
-          className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+          className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-extrabold text-sm uppercase tracking-wide hover:brightness-105 transition flex items-center justify-center gap-2 shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none"
         >
           <Upload className="w-4 h-4" />
           Enviar e Processar {slots.filter((s) => s.file).length === 2 ? "os 2 arquivos" : "arquivo"}
@@ -266,18 +266,18 @@ function SlotCard({
 
       {/* Processing */}
       {slot.status === "processing" && (
-        <div className="border border-purple-200 bg-purple-50 rounded-2xl p-5 space-y-3">
+        <div className="border border-indigo-200 bg-indigo-50 rounded-2xl p-5 space-y-3">
           <div className="flex items-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin text-purple-600 flex-shrink-0" />
-            <p className="text-sm font-medium text-purple-900">Processando com IA...</p>
+            <Loader2 className="w-4 h-4 animate-spin text-indigo-600 flex-shrink-0" />
+            <p className="text-sm font-medium text-indigo-900">Processando com IA...</p>
           </div>
           <p className="text-xs text-gray-500 truncate">{slot.file?.name}</p>
-          <div className="flex items-center gap-1.5 text-xs text-purple-700">
+          <div className="flex items-center gap-1.5 text-xs text-indigo-700">
             <Clock className="w-3 h-3" />
             <span>Isso pode levar alguns minutos</span>
           </div>
-          <div className="w-full bg-purple-100 rounded-full h-1.5 overflow-hidden">
-            <div className="h-full bg-purple-500 rounded-full animate-pulse w-3/5" />
+          <div className="w-full bg-indigo-100 rounded-full h-1.5 overflow-hidden">
+            <div className="h-full bg-indigo-500 rounded-full animate-pulse w-3/5" />
           </div>
         </div>
       )}

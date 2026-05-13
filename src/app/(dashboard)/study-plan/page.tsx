@@ -56,15 +56,16 @@ export default function StudyPlanPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Plano de Estudos</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest mb-0.5">IA</p>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Plano de Estudos</h1>
+          <p className="text-xs text-gray-400 font-medium mt-0.5">
             Plano personalizado gerado por IA com base nos seus erros.
           </p>
         </div>
         <button
           onClick={handleGenerate}
           disabled={generating}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 transition"
+          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-extrabold uppercase tracking-wide hover:brightness-105 disabled:opacity-60 transition shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none flex-shrink-0"
         >
           {generating ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Gerando...</>
@@ -117,7 +118,7 @@ export default function StudyPlanPage() {
       )}
 
       {!plan && !generating && !error && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+        <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-12 text-center">
           <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mx-auto mb-4">
             <BookOpen className="w-8 h-8 text-indigo-400" />
           </div>
@@ -140,7 +141,7 @@ export default function StudyPlanPage() {
       {plan && !generating && (
         <>
           {plan.weakAreas.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-5">
+            <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-5">
               <div className="flex items-center gap-2 mb-3">
                 <AlertCircle className="w-4 h-4 text-orange-500" />
                 <p className="text-sm font-semibold text-gray-900">Áreas identificadas para foco</p>
@@ -155,7 +156,7 @@ export default function StudyPlanPage() {
             </div>
           )}
 
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-6">
             <div className="flex items-center gap-2 mb-4 pb-4 border-b border-gray-100">
               <Sparkles className="w-4 h-4 text-indigo-500" />
               <p className="text-sm font-medium text-gray-700">Gerado por IA</p>

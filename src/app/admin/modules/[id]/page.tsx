@@ -31,7 +31,7 @@ export default async function EditModulePage({
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Editar módulo</h1>
+            <h1 className="text-2xl font-black text-[#1A1B2E]">Editar módulo</h1>
             <p className="text-sm text-gray-400 mt-0.5">{mod.title}</p>
           </div>
         </div>
@@ -44,10 +44,10 @@ export default async function EditModulePage({
         <ModuleForm module={mod} />
 
         {/* Right: questions */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
             <div>
-              <h2 className="text-sm font-semibold text-gray-900">Questões</h2>
+              <h2 className="text-sm font-extrabold text-[#1A1B2E]">Questões</h2>
               <p className="text-xs text-gray-400 mt-0.5">{mod.questions.length} cadastrada{mod.questions.length !== 1 ? "s" : ""}</p>
             </div>
             <Link

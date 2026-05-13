@@ -89,7 +89,7 @@ export default function AdminSettingsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Configurações do Sistema</h1>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Configurações do Sistema</h1>
           <p className="text-sm text-gray-500 mt-1">Ajuste tempos, porcentagens e limites usados em todo o sistema.</p>
         </div>
         <button
@@ -120,7 +120,7 @@ export default function AdminSettingsPage() {
 
       {/* Groups */}
       {GROUPS.map((group) => (
-        <div key={group.title} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div key={group.title} className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] overflow-hidden">
           <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-gray-50/50">
             <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
               <Settings2 className="w-4 h-4 text-indigo-600" />

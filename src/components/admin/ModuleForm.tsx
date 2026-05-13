@@ -72,8 +72,8 @@ export function ModuleForm({ module }: { module?: Module }) {
       </div>
       <div className={cn("items-start", previewSummary ? "grid lg:grid-cols-2 gap-6" : "")}>
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
-          <h2 className="font-semibold text-gray-900">Dados do módulo</h2>
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-6 space-y-5">
+          <h2 className="font-extrabold text-[#1A1B2E]">Dados do módulo</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-2">

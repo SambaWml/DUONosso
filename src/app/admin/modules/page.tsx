@@ -36,12 +36,12 @@ export default async function AdminModulesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Módulos</h1>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Módulos</h1>
           <p className="text-sm text-gray-400 mt-0.5">{modules.length} módulos · {totalQuestions} questões</p>
         </div>
         <Link
           href="/admin/modules/new"
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-extrabold uppercase tracking-wide hover:brightness-105 transition shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none"
         >
           <Plus className="w-4 h-4" />
           Novo módulo
@@ -68,7 +68,7 @@ export default async function AdminModulesPage() {
           <BookOpen className="w-10 h-10 text-gray-200 mx-auto mb-4" />
           <p className="text-gray-500 font-medium">Nenhum módulo cadastrado</p>
           <p className="text-sm text-gray-400 mt-1 mb-5">Crie o primeiro módulo para começar a adicionar questões.</p>
-          <Link href="/admin/modules/new" className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition">
+          <Link href="/admin/modules/new" className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-extrabold uppercase tracking-wide hover:brightness-105 transition shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none">
             <Plus className="w-4 h-4" /> Criar módulo
           </Link>
         </div>
@@ -111,7 +111,7 @@ export default async function AdminModulesPage() {
             </div>
 
             {/* Module rows */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] overflow-hidden">
               {groups.map((group, i) => {
                 const primary = group[0];
                 const isDuplicate = group.length > 1;

@@ -28,7 +28,7 @@ const LEVEL_CONFIG = {
   INFO:  { icon: Info,          color: "text-blue-600",  bg: "bg-blue-50 border-blue-200",   badge: "bg-blue-100 text-blue-800" },
   WARN:  { icon: AlertTriangle, color: "text-yellow-600",bg: "bg-yellow-50 border-yellow-200",badge: "bg-yellow-100 text-yellow-800" },
   ERROR: { icon: AlertCircle,   color: "text-red-600",   bg: "bg-red-50 border-red-200",     badge: "bg-red-100 text-red-800" },
-  FATAL: { icon: Zap,           color: "text-purple-600",bg: "bg-purple-50 border-purple-200",badge:"bg-purple-100 text-purple-800" },
+  FATAL: { icon: Zap,           color: "text-indigo-600",bg: "bg-indigo-50 border-indigo-200",badge:"bg-indigo-100 text-indigo-800" },
 };
 
 export default function LogsPage() {
@@ -93,7 +93,7 @@ export default function LogsPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Logs do Sistema</h1>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Logs do Sistema</h1>
           <p className="text-gray-500 text-sm mt-1">
             Monitoramento de erros e eventos em tempo real.
           </p>
@@ -129,13 +129,13 @@ export default function LogsPage() {
               key={lvl}
               onClick={() => { setLevel(lvl === level ? "ALL" : lvl); setPage(1); }}
               className={cn(
-                "flex items-center gap-3 p-4 rounded-2xl border text-left transition",
-                level === lvl ? cfg.bg : "bg-white border-gray-200 hover:bg-gray-50"
+                "flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition",
+                level === lvl ? cfg.bg : "border-[#E9E4F2] bg-white hover:bg-gray-50"
               )}
             >
               <Icon className={cn("w-5 h-5 flex-shrink-0", cfg.color)} />
               <div>
-                <p className="text-xl font-bold text-gray-900">{count}</p>
+                <p className="text-xl font-black text-[#1A1B2E]">{count}</p>
                 <p className="text-xs text-gray-500">{lvl}</p>
               </div>
             </button>
@@ -174,7 +174,7 @@ export default function LogsPage() {
       </div>
 
       {/* Log list */}
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] overflow-hidden">
         {loading && logs.length === 0 ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />

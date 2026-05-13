@@ -76,24 +76,25 @@ export default function PathPage() {
           <ChevronLeft className="w-5 h-5 text-gray-500" />
         </button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-bold text-gray-900">{path.title}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest mb-0.5">Trilha de Estudos</p>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">{path.title}</h1>
+          <p className="text-xs text-gray-400 font-medium mt-0.5">
             {done}/{total} módulos concluídos
-            {estLabel && <span className="text-gray-400"> · {estLabel}</span>}
+            {estLabel && <span className="text-gray-300"> · {estLabel}</span>}
           </p>
         </div>
         {allDone && <Trophy className="w-7 h-7 text-yellow-500 flex-shrink-0" />}
       </div>
 
       {/* Progress */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-5">
+      <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-5">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-medium text-gray-700">Progresso geral</span>
-          <span className="text-2xl font-bold text-indigo-600">{pct}%</span>
+          <span className="text-xs font-extrabold text-gray-400 uppercase tracking-wide">Progresso geral</span>
+          <span className="text-2xl font-black text-indigo-600">{pct}%</span>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-3">
+        <div className="w-full bg-[#EBE3FF] rounded-full h-3 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500"
+            className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full transition-all duration-500 shadow-[inset_0_-2px_0_rgba(0,0,0,0.12)]"
             style={{ width: `${pct}%` }}
           />
         </div>
@@ -106,7 +107,7 @@ export default function PathPage() {
 
       {/* Completed banner */}
       {allDone && (
-        <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+        <div className="bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-2xl p-6 text-white shadow-lg">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
               <Trophy className="w-8 h-8 text-yellow-300" />
@@ -117,7 +118,7 @@ export default function PathPage() {
             </div>
             <button
               onClick={() => router.push("/simulation")}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white text-indigo-700 rounded-xl font-semibold hover:bg-indigo-50 transition text-sm flex-shrink-0"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white text-indigo-700 rounded-xl font-extrabold uppercase tracking-wide text-xs hover:bg-indigo-50 transition flex-shrink-0 shadow-[0_3px_0_rgba(0,0,0,0.15)] active:translate-y-0.5 active:shadow-none"
             >
               <PlayCircle className="w-4 h-4" /> Simulado Final
             </button>
@@ -130,7 +131,7 @@ export default function PathPage() {
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-orange-500" />
-            <h2 className="text-sm font-semibold text-orange-700 uppercase tracking-wide">Áreas Prioritárias</h2>
+            <h2 className="text-xs font-extrabold text-orange-600 uppercase tracking-widest">Áreas Prioritárias</h2>
             <span className="text-xs text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">{priorityMods.length} módulo{priorityMods.length !== 1 ? "s" : ""}</span>
           </div>
           <ModuleGrid modules={priorityMods} pathId={id} router={router} />
@@ -141,7 +142,7 @@ export default function PathPage() {
       {standardMods.length > 0 && (
         <section className="space-y-3">
           {priorityMods.length > 0 && (
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wide">Demais Capítulos</h2>
+            <h2 className="text-xs font-extrabold text-gray-400 uppercase tracking-widest">Demais Capítulos</h2>
           )}
           <ModuleGrid modules={standardMods} pathId={id} router={router} />
         </section>
@@ -167,8 +168,8 @@ function ModuleGrid({ modules, pathId, router }: { modules: Module[]; pathId: st
             className={cn(
               "text-left rounded-2xl border-2 p-4 transition-all group",
               isCompleted && "border-green-200 bg-green-50 hover:border-green-300 hover:shadow-md",
-              isCurrent && mod.isPriority && "border-orange-300 bg-orange-50 hover:border-orange-400 hover:shadow-md",
-              isCurrent && !mod.isPriority && "border-indigo-300 bg-indigo-50 hover:border-indigo-400 hover:shadow-md",
+              isCurrent && mod.isPriority && "border-orange-300 bg-orange-50 hover:border-orange-400 shadow-[0_2px_0_#fed7aa]",
+              isCurrent && !mod.isPriority && "border-indigo-200 bg-indigo-50 hover:border-indigo-300 shadow-[0_2px_0_#D5C5FF]",
               isLocked && "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed"
             )}
           >
@@ -204,7 +205,7 @@ function ModuleGrid({ modules, pathId, router }: { modules: Module[]; pathId: st
             </div>
 
             <p className={cn(
-              "font-semibold text-sm leading-snug mb-1",
+              "font-extrabold text-sm leading-snug mb-1",
               isCompleted && "text-green-800",
               isCurrent && mod.isPriority ? "text-orange-800" : isCurrent ? "text-indigo-800" : "",
               isLocked && "text-gray-400"

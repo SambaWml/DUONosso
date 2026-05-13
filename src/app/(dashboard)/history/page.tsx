@@ -51,38 +51,39 @@ export default function HistoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Histórico de Simulados</h1>
-        <p className="text-gray-500 text-sm mt-1">Acompanhe sua evolução ao longo do tempo.</p>
+        <p className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest mb-0.5">Resultados</p>
+        <h1 className="text-2xl font-black text-[#1A1B2E]">Histórico de Simulados</h1>
+        <p className="text-xs text-gray-400 font-medium mt-0.5">Acompanhe sua evolução ao longo do tempo.</p>
       </div>
 
       {/* Summary stats */}
       {totalSimulations > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-2xl border border-gray-200 p-5">
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-5">
             <BarChart3 className="w-5 h-5 text-indigo-500 mb-2" />
-            <p className="text-2xl font-bold text-gray-900">{totalSimulations}</p>
-            <p className="text-xs text-gray-500">Total de simulados</p>
+            <p className="text-2xl font-black text-[#1A1B2E]">{totalSimulations}</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mt-0.5">Total</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-200 p-5">
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-5">
             <Target className="w-5 h-5 text-green-500 mb-2" />
-            <p className="text-2xl font-bold text-gray-900">{avgScore}%</p>
-            <p className="text-xs text-gray-500">Média geral</p>
+            <p className="text-2xl font-black text-[#1A1B2E]">{avgScore}%</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mt-0.5">Média geral</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-200 p-5">
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-5">
             <Trophy className="w-5 h-5 text-yellow-500 mb-2" />
-            <p className="text-2xl font-bold text-gray-900">{Math.round(bestScore)}%</p>
-            <p className="text-xs text-gray-500">Melhor score</p>
+            <p className="text-2xl font-black text-[#1A1B2E]">{Math.round(bestScore)}%</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mt-0.5">Melhor score</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-200 p-5">
-            <Clock className="w-5 h-5 text-purple-500 mb-2" />
-            <p className="text-2xl font-bold text-gray-900">{approved}</p>
-            <p className="text-xs text-gray-500">Aprovações (≥65%)</p>
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-5">
+            <Clock className="w-5 h-5 text-indigo-500 mb-2" />
+            <p className="text-2xl font-black text-[#1A1B2E]">{approved}</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mt-0.5">Aprovações (≥65%)</p>
           </div>
         </div>
       )}
 
       {simulations.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+        <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-12 text-center">
           <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
             <BarChart3 className="w-8 h-8 text-gray-400" />
           </div>
@@ -90,13 +91,13 @@ export default function HistoryPage() {
           <p className="text-gray-500 text-sm mb-6">Complete seu primeiro simulado para ver o histórico.</p>
           <Link
             href="/simulation"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium text-sm hover:bg-indigo-700 transition"
+            className="inline-flex items-center gap-2 px-6 py-3.5 bg-indigo-600 text-white rounded-xl font-extrabold text-xs uppercase tracking-wide hover:brightness-105 transition shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none"
           >
             Iniciar Simulado
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-200">
+        <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] overflow-hidden">
           <div className="divide-y divide-gray-100">
             {(() => {
               const bestIdx = simulations.reduce(

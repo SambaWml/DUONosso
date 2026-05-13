@@ -307,7 +307,7 @@ export default function ImportPage() {
           <ArrowLeft className="w-5 h-5 text-gray-500" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Importar Conteúdo</h1>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Importar Conteúdo</h1>
           <p className="text-sm text-gray-500">CSV/JSON para questões ou JSON para módulos + questões</p>
         </div>
       </div>
@@ -420,7 +420,7 @@ export default function ImportPage() {
 
       {/* ── Questions preview ──────────────────────────────────────────────── */}
       {parsedQ && parsedQ.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+        <div className="bg-white border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] rounded-2xl overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <div>
               <p className="font-semibold text-gray-900">{parsedQ.length} questões encontradas</p>

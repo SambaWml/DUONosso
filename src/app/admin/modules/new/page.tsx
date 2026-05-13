@@ -10,7 +10,7 @@ export default function NewModulePage() {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Novo módulo</h1>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Novo módulo</h1>
           <p className="text-sm text-gray-400 mt-0.5">Capítulo de estudo CTFL</p>
         </div>
       </div>

@@ -33,7 +33,7 @@ export default async function AdminQuestionsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Questões</h1>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Questões</h1>
           <p className="text-sm text-gray-400 mt-0.5">{questions.length} no banco · {activeCount} ativas</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -95,7 +95,7 @@ export default async function AdminQuestionsPage() {
             </div>
 
             {/* Question rows */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] overflow-hidden">
               {qs.map((q, i) => (
                 <div
                   key={q.id}
@@ -123,7 +123,7 @@ export default async function AdminQuestionsPage() {
 
                   <div className="flex items-center gap-0.5 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity mt-0.5">
                     <Link
-                      href={`/admin/questions/${q.id}?moduleId=${moduleId}`}
+                      href={`/admin/questions/${q.id}`}
                       className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                       title="Editar"
                     >

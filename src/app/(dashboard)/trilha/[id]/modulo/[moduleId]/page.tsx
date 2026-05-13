@@ -255,8 +255,8 @@ export default function ModulePage() {
               <PdfPageViewer pdfUrl={pdfUrl} startPage={startPage} endPage={endPage ?? startPage} />
             )}
 
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <div className="bg-white border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] rounded-2xl p-6">
+              <h2 className="text-base font-extrabold text-[#1A1B2E] mb-4 flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-indigo-500" /> {moduleTitle}
               </h2>
               <div className="text-sm text-gray-700 leading-relaxed">
@@ -305,7 +305,7 @@ export default function ModulePage() {
 
           {/* Right — sticky action panel */}
           <div className="hidden lg:flex flex-col gap-4 w-72 flex-shrink-0 sticky top-4">
-            <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4">
+            <div className="bg-white border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] rounded-2xl p-5 space-y-4">
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Módulo</p>
                 <p className="font-semibold text-gray-900 text-sm">{moduleTitle}</p>
@@ -326,7 +326,7 @@ export default function ModulePage() {
               </div>
               <button
                 onClick={() => setPhase("quiz")}
-                className="w-full py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+                className="w-full py-3 bg-indigo-600 text-white rounded-xl font-extrabold text-sm uppercase tracking-wide hover:brightness-105 transition flex items-center justify-center gap-2 shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none"
               >
                 <PlayCircle className="w-5 h-5" /> Iniciar Quiz
               </button>
@@ -358,7 +358,7 @@ export default function ModulePage() {
               <span>Material de apoio</span>
             </a>
           )}
-          <button onClick={() => setPhase("quiz")} className="w-full py-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-2 text-lg">
+          <button onClick={() => setPhase("quiz")} className="w-full py-4 bg-indigo-600 text-white rounded-xl font-extrabold uppercase tracking-wide hover:brightness-105 transition flex items-center justify-center gap-2 shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none">
             <PlayCircle className="w-5 h-5" /> Pronto! Iniciar Quiz →
           </button>
         </div>
@@ -444,7 +444,7 @@ export default function ModulePage() {
           {!passed && (
             <button
               onClick={() => loadQuestions(true)}
-              className="flex-1 flex items-center justify-center gap-2 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition"
+              className="flex-1 flex items-center justify-center gap-2 py-3 bg-indigo-600 text-white rounded-xl font-extrabold text-sm uppercase tracking-wide hover:brightness-105 transition shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none"
             >
               <RotateCcw className="w-4 h-4" />
               Tentar novamente
@@ -495,7 +495,7 @@ export default function ModulePage() {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-5 shadow-sm">
+      <div className="bg-white border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] rounded-2xl p-6 space-y-5">
         <div className="flex items-start gap-2">
           <Flame className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
           <p className="text-gray-900 font-medium leading-relaxed">{q.statement}</p>
@@ -551,7 +551,7 @@ export default function ModulePage() {
           const selectedList = selected ? selected.split(",").filter(Boolean) : [];
           return selectedList.length !== answerCount || submitting;
         })()}
-        className="w-full py-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-lg"
+        className="w-full py-4 bg-indigo-600 text-white rounded-xl font-extrabold uppercase tracking-wide hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none"
       >
         {submitting ? (
           <span className="flex items-center justify-center gap-2">
@@ -581,7 +581,7 @@ function PdfPageViewer({
   const totalPages = endPage - startPage + 1;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+    <div className="bg-white border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] rounded-2xl overflow-hidden">
       {/* Header — always visible, acts as toggle */}
       <button
         id="pdf-viewer-toggle"

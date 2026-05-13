@@ -1,11 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Nunito } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800", "900"],
+});
 
 export const metadata: Metadata = {
-  title: "CTFL Smart Prep",
+  title: "QVenture",
   description: "Plataforma de estudos para certificação ISTQB CTFL",
 };
 
@@ -22,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className="h-full">
-      <body className={`${inter.className} min-h-full antialiased`}>{children}</body>
+      <body className={`${nunito.className} min-h-full antialiased`}>{children}</body>
     </html>
   );
 }

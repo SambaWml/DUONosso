@@ -27,7 +27,7 @@ export default async function NewQuestionPage({
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Nova questão</h1>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Nova questão</h1>
           <p className="text-sm text-gray-400 mt-0.5">Adicionar ao banco de questões</p>
         </div>
       </div>

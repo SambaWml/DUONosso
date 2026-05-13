@@ -36,7 +36,7 @@ export default async function EditQuestionPage({
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Editar questão</h1>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Editar questão</h1>
           <p className="text-sm text-gray-400 mt-0.5 line-clamp-1">{question.statement}</p>
         </div>
       </div>

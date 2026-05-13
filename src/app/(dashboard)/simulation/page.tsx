@@ -245,17 +245,18 @@ export default function SimulationPage() {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Simulado CTFL</h1>
+          <p className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest mb-0.5">Avaliação</p>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Simulado CTFL</h1>
           <p className="text-gray-500 text-sm mt-1">
             40 questões no padrão oficial ISTQB — distribuição por capítulo conforme syllabus v4.0.
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
+        <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-8 text-center">
           <div className="w-20 h-20 rounded-2xl bg-indigo-50 flex items-center justify-center mx-auto mb-5">
             <PlayCircle className="w-10 h-10 text-indigo-600" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Pronto para o simulado?</h2>
+          <h2 className="text-xl font-black text-[#1A1B2E] mb-2">Pronto para o simulado?</h2>
           <p className="text-gray-500 text-sm mb-8">
             Mesmo formato da prova oficial: 40 questões, 65 minutos, aprovação com 26 acertos (65%).
           </p>
@@ -277,7 +278,7 @@ export default function SimulationPage() {
               { label: "Tempo", value: "65min" },
             ].map(({ label, value }) => (
               <div key={label} className="bg-gray-50 rounded-xl p-4">
-                <p className="text-2xl font-bold text-gray-900">{value}</p>
+                <p className="text-2xl font-black text-[#1A1B2E]">{value}</p>
                 <p className="text-xs text-gray-500 mt-0.5">{label}</p>
               </div>
             ))}
@@ -294,7 +295,7 @@ export default function SimulationPage() {
           )}
           <button
             onClick={startSimulation}
-            className="w-full py-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+            className="w-full py-4 bg-indigo-600 text-white rounded-xl font-extrabold text-sm uppercase tracking-wide hover:brightness-105 transition flex items-center justify-center gap-2 shadow-[0_4px_0_#3E2EA0] active:translate-y-1 active:shadow-[0_2px_0_#3E2EA0]"
           >
             <PlayCircle className="w-5 h-5" />
             {draft ? "Novo Simulado" : "Iniciar Simulado"}
@@ -310,10 +311,10 @@ export default function SimulationPage() {
     return (
       <div className="max-w-lg mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Preparando Simulado</h1>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Preparando Simulado</h1>
           <p className="text-gray-500 text-sm mt-1">Selecionando questões do banco oficial CTFL.</p>
         </div>
-        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-2xl p-7 space-y-5">
+        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 rounded-2xl p-7 space-y-5">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-indigo-700 font-medium">
               <Sparkles className="w-4 h-4 animate-pulse" />
@@ -329,7 +330,7 @@ export default function SimulationPage() {
             </div>
             <div className="w-full bg-indigo-100 rounded-full h-2 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-[3000ms] ease-out"
+                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-[3000ms] ease-out"
                 style={{ width: `${pct}%` }}
               />
             </div>
@@ -403,7 +404,7 @@ export default function SimulationPage() {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Top bar — full width */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-3 flex items-center gap-4 mb-4">
+      <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-3 flex items-center gap-4 mb-4">
         <div className={cn(
           "flex items-center gap-1.5 text-sm font-bold tabular-nums px-3 py-1.5 rounded-lg flex-shrink-0",
           timeCritical ? "bg-red-100 text-red-700" :
@@ -434,7 +435,7 @@ export default function SimulationPage() {
       <div className="flex gap-4 items-start">
         {/* Left panel — question map + navigation */}
         <div className="hidden lg:flex flex-col gap-3 w-56 flex-shrink-0 sticky top-4">
-          <div className="bg-white rounded-2xl border border-gray-200 p-4">
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-4">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Questões</p>
             <div className="grid grid-cols-5 gap-1.5">
               {questions.map((q, i) => (
@@ -494,7 +495,7 @@ export default function SimulationPage() {
               {showMap ? "Fechar mapa" : "Ver mapa de questões"}
             </button>
             {showMap && (
-              <div className="bg-white rounded-2xl border border-gray-200 p-4 mt-2">
+              <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-4 mt-2">
                 <div className="grid grid-cols-8 sm:grid-cols-10 gap-2">
                   {questions.map((q, i) => (
                     <button
@@ -516,7 +517,7 @@ export default function SimulationPage() {
 
           {/* Question card */}
           {current && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-6">
               <div className="flex items-start justify-between gap-4 mb-5">
                 <div>
                   <div className="flex items-center gap-2 mb-1.5">

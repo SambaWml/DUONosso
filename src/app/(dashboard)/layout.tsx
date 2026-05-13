@@ -16,11 +16,11 @@ export default async function DashboardLayout({
 
   return (
     <SessionProvider>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[#FFF7EC]">
         <Sidebar />
         <div className="lg:pl-64">
           <Header />
-          <main className="p-4 lg:p-8 pb-24 lg:pb-8">
+          <main className="p-4 lg:p-8 pb-24 lg:pb-8 overflow-x-hidden">
             <ErrorBoundary>{children}</ErrorBoundary>
           </main>
         </div>

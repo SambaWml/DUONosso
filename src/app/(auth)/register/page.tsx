@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { GraduationCap, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -37,18 +37,20 @@ export default function RegisterPage() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="bg-white rounded-2xl shadow-xl p-8">
+      <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_4px_0_#D8D2E5] p-8">
+        {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center mb-4">
-            <GraduationCap className="w-8 h-8 text-white" />
+          <div className="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center mb-4 shadow-[0_4px_0_#3E2EA0]">
+            <span className="text-white font-black text-2xl leading-none">Q</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Crie sua conta</h1>
-          <p className="text-gray-500 text-sm mt-1">CTFL Smart Prep</p>
+          <p className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest mb-1">Crie sua conta</p>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">QVenture</h1>
+          <p className="text-sm text-gray-400 font-medium mt-0.5">Comece a estudar hoje</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-xs font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
               Nome completo
             </label>
             <input
@@ -56,13 +58,13 @@ export default function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[#E9E4F2] focus:outline-none focus:border-indigo-400 focus:ring-0 text-sm font-medium transition"
               placeholder="Seu nome"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-xs font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
               Email
             </label>
             <input
@@ -70,13 +72,13 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[#E9E4F2] focus:outline-none focus:border-indigo-400 focus:ring-0 text-sm font-medium transition"
               placeholder="seu@email.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-xs font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
               Senha
             </label>
             <div className="relative">
@@ -86,7 +88,7 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition pr-11"
+                className="w-full px-4 py-3 rounded-xl border-2 border-[#E9E4F2] focus:outline-none focus:border-indigo-400 focus:ring-0 text-sm font-medium transition pr-11"
                 placeholder="Mínimo 6 caracteres"
               />
               <button
@@ -100,7 +102,7 @@ export default function RegisterPage() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+            <div className="bg-red-50 border-2 border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 font-medium">
               {error}
             </div>
           )}
@@ -108,16 +110,16 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-indigo-600 text-white rounded-xl font-medium text-sm hover:bg-indigo-700 disabled:opacity-60 transition flex items-center justify-center gap-2"
+            className="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-extrabold text-sm uppercase tracking-wide hover:brightness-105 disabled:opacity-60 transition flex items-center justify-center gap-2 shadow-[0_4px_0_#3E2EA0] active:translate-y-1 active:shadow-[0_2px_0_#3E2EA0]"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? "Criando conta..." : "Criar conta"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-gray-400 font-medium mt-6">
           Já tem conta?{" "}
-          <Link href="/login" className="text-indigo-600 font-medium hover:underline">
+          <Link href="/login" className="text-indigo-600 font-extrabold hover:underline">
             Entrar
           </Link>
         </p>

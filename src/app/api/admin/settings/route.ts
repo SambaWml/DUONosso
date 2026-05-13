@@ -6,26 +6,31 @@ import { SETTING_DEFAULTS, SETTING_LABELS, invalidateSettingsCache, type Setting
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  try {
+    const session = await auth();
+    if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const rows = await prisma.systemConfig.findMany();
+    const stored = Object.fromEntries(rows.map((r: { key: string; value: string }) => [r.key, parseInt(r.value, 10)]));
+
+    const settings = Object.fromEntries(
+      (Object.keys(SETTING_DEFAULTS) as SettingKey[]).map((key) => [
+        key,
+        {
+          value: stored[key] ?? SETTING_DEFAULTS[key],
+          default: SETTING_DEFAULTS[key],
+          ...SETTING_LABELS[key],
+        },
+      ])
+    );
+
+    return NextResponse.json(settings);
+  } catch (err) {
+    console.error("[settings GET]", err);
+    return NextResponse.json({ error: String(err) }, { status: 500 });
   }
-
-  const rows = await prisma.systemConfig.findMany();
-  const stored = Object.fromEntries(rows.map((r: { key: string; value: string }) => [r.key, parseInt(r.value, 10)]));
-
-  const settings = Object.fromEntries(
-    (Object.keys(SETTING_DEFAULTS) as SettingKey[]).map((key) => [
-      key,
-      {
-        value: stored[key] ?? SETTING_DEFAULTS[key],
-        default: SETTING_DEFAULTS[key],
-        ...SETTING_LABELS[key],
-      },
-    ])
-  );
-
-  return NextResponse.json(settings);
 }
 
 export async function PUT(req: NextRequest) {

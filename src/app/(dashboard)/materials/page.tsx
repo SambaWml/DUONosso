@@ -58,12 +58,12 @@ export default function MaterialsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Materiais</h1>
+          <h1 className="text-2xl font-black text-[#1A1B2E]">Materiais</h1>
           <p className="text-gray-500 text-sm mt-1">PDFs enviados e processados.</p>
         </div>
         <Link
           href="/upload"
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition"
+          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-extrabold uppercase tracking-wide hover:brightness-105 transition shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none"
         >
           <Upload className="w-4 h-4" />
           Enviar PDF
@@ -71,7 +71,7 @@ export default function MaterialsPage() {
       </div>
 
       {materials.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+        <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-12 text-center">
           <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
             <FileText className="w-8 h-8 text-gray-400" />
           </div>
@@ -79,7 +79,7 @@ export default function MaterialsPage() {
           <p className="text-gray-500 text-sm mb-6">Envie o syllabus CTFL em PDF para começar.</p>
           <Link
             href="/upload"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium text-sm hover:bg-indigo-700 transition"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-extrabold text-sm uppercase tracking-wide hover:brightness-105 transition shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none"
           >
             <Upload className="w-4 h-4" />
             Enviar primeiro PDF
@@ -90,7 +90,7 @@ export default function MaterialsPage() {
           {materials.map((m) => (
             <div
               key={m.id}
-              className="bg-white rounded-2xl border border-gray-200 p-5 flex items-center gap-4"
+              className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-5 flex items-center gap-4"
             >
               <div className={cn(
                 "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0",

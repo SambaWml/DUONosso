@@ -248,7 +248,7 @@ export default function ResultsPage() {
       {newTrack && (
         <button
           onClick={() => router.push("/trilha")}
-          className="w-full flex items-center gap-3 bg-indigo-600 text-white rounded-2xl px-5 py-4 hover:bg-indigo-700 transition text-left"
+          className="w-full flex items-center gap-3 bg-indigo-600 text-white rounded-2xl px-5 py-4 hover:brightness-105 transition text-left shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none"
         >
           <Flame className="w-5 h-5 flex-shrink-0" />
           <div className="flex-1 min-w-0">
@@ -260,7 +260,7 @@ export default function ResultsPage() {
           <ChevronRight className="w-5 h-5 flex-shrink-0 text-indigo-300" />
         </button>
       )}
-      <div className="flex gap-6 items-start">
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* Left column — result summary + stats + chapter performance */}
         <div className="flex-shrink-0 w-full lg:w-80 xl:w-96 space-y-4">
           {/* Result header */}
@@ -271,7 +271,7 @@ export default function ResultsPage() {
             <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: approved ? "#d1fae5" : "#fee2e2" }}>
               {approved ? <Trophy className="w-8 h-8 text-green-600" /> : <Target className="w-8 h-8 text-red-500" />}
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-1">{Math.round(data.percentage)}%</h1>
+            <h1 className="text-4xl font-black text-[#1A1B2E] mb-1">{Math.round(data.percentage)}%</h1>
             <div className="flex items-center justify-center gap-2 flex-wrap">
               <span className={cn("text-sm px-3 py-1 rounded-full font-semibold", badge.color)}>{badge.label}</span>
               {prevPct !== null && (() => {
@@ -287,28 +287,28 @@ export default function ResultsPage() {
 
           {/* Stats grid */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
+            <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-4 text-center">
               <CheckCircle2 className="w-5 h-5 text-green-500 mx-auto mb-1.5" />
-              <p className="text-2xl font-bold text-gray-900">{data.score}</p>
+              <p className="text-2xl font-black text-[#1A1B2E]">{data.score}</p>
               <p className="text-xs text-gray-500">Acertos</p>
             </div>
-            <div className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
+            <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-4 text-center">
               <XCircle className="w-5 h-5 text-red-400 mx-auto mb-1.5" />
-              <p className="text-2xl font-bold text-gray-900">{data.totalQuestions - data.score}</p>
+              <p className="text-2xl font-black text-[#1A1B2E]">{data.totalQuestions - data.score}</p>
               <p className="text-xs text-gray-500">Erros</p>
             </div>
-            <div className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
+            <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-4 text-center">
               <Clock className="w-5 h-5 text-indigo-500 mx-auto mb-1.5" />
-              <p className="text-xl font-bold text-gray-900">{formatDuration(data.timeSpentSec)}</p>
+              <p className="text-xl font-black text-[#1A1B2E]">{formatDuration(data.timeSpentSec)}</p>
               <p className="text-xs text-gray-500">Tempo</p>
             </div>
           </div>
 
           {/* Chapter performance */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-5">
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-5">
             <div className="flex items-center gap-2 mb-4">
               <BarChart3 className="w-5 h-5 text-indigo-600" />
-              <h2 className="font-semibold text-gray-900">Por Capítulo</h2>
+              <h2 className="font-extrabold text-[#1A1B2E]">Por Capítulo</h2>
             </div>
             <div className="space-y-3">
               {chapterPerformance.map((c) => {
@@ -343,11 +343,11 @@ export default function ResultsPage() {
           {/* Actions */}
           <div className="flex flex-col gap-2">
             <button onClick={() => router.push("/simulation")}
-              className="flex items-center justify-center gap-2 py-3 bg-indigo-600 text-white rounded-xl font-medium text-sm hover:bg-indigo-700 transition">
+              className="flex items-center justify-center gap-2 py-3 bg-indigo-600 text-white rounded-xl font-extrabold text-sm uppercase tracking-wide hover:brightness-105 transition shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-none">
               <PlayCircle className="w-4 h-4" /> Novo Simulado
             </button>
             <Link href="/study-plan"
-              className="flex items-center justify-center gap-2 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50 transition">
+              className="flex items-center justify-center gap-2 py-3 bg-white border-2 border-[#E9E4F2] text-gray-700 rounded-xl font-extrabold text-sm uppercase tracking-wide hover:bg-indigo-50 transition">
               <BookOpen className="w-4 h-4" /> Ver Plano de Estudos
             </Link>
           </div>
@@ -355,9 +355,9 @@ export default function ResultsPage() {
 
         {/* Right column — detailed review */}
         <div className="flex-1 min-w-0">
-          <div className="bg-white rounded-2xl border border-gray-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h2 className="font-semibold text-gray-900">Revisão Detalhada</h2>
+          <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#E9E4F2]">
+              <h2 className="font-extrabold text-[#1A1B2E]">Revisão Detalhada</h2>
               <div className="flex gap-2">
                 {(["all", "correct", "wrong"] as const).map((f) => (
                   <button key={f} onClick={() => setFilter(f)}

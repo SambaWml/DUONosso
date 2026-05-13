@@ -10,7 +10,7 @@ export default async function AuthLayout({
   if (session) redirect("/dashboard");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#F4F0FF] via-[#FFF7EC] to-[#F4F0FF] flex items-center justify-center p-4">
       {children}
     </div>
   );

@@ -78,10 +78,11 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <p className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-widest mb-1">Dashboard</p>
+        <h1 className="text-2xl font-black text-[#1A1B2E]">
           Olá, {session?.user?.name?.split(" ")[0]} 👋
         </h1>
-        <p className="text-gray-500 text-sm mt-1">Veja seu progresso nos estudos para o CTFL.</p>
+        <p className="text-sm text-gray-400 font-medium mt-0.5">Veja seu progresso nos estudos para o CTFL.</p>
       </div>
 
       {/* Stats */}
@@ -100,10 +101,10 @@ export default function DashboardPage() {
           highlight={stats ? stats.averageScore >= 65 : false}
         />
         <StatCard
-          icon={<Brain className="w-6 h-6 text-purple-600" />}
+          icon={<Brain className="w-6 h-6 text-indigo-600" />}
           label="Questões no Banco"
           value={stats?.totalQuestions ?? 0}
-          bg="bg-purple-50"
+          bg="bg-indigo-50"
         />
         <StatCard
           icon={<BookOpen className="w-6 h-6 text-orange-600" />}
@@ -127,35 +128,35 @@ export default function DashboardPage() {
         </Link>
       )}
       {track && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+        <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] p-5 space-y-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-orange-100 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center">
                 <Flame className="w-4 h-4 text-orange-500" />
               </div>
               <div>
-                <p className="font-semibold text-gray-900 text-sm">Trilha de Estudos</p>
+                <p className="font-extrabold text-[#1A1B2E] text-sm">Trilha de Estudos</p>
                 {track.currentModule && (
-                  <p className="text-xs text-indigo-600 truncate max-w-[220px]">Agora: {track.currentModule}</p>
+                  <p className="text-xs text-indigo-500 font-medium truncate max-w-[220px]">Agora: {track.currentModule}</p>
                 )}
               </div>
             </div>
-            <span className="text-xl font-bold text-indigo-600 flex-shrink-0">
+            <span className="text-2xl font-black text-indigo-600 flex-shrink-0">
               {track.total > 0 ? Math.round((track.done / track.total) * 100) : 0}%
             </span>
           </div>
-          <div className="w-full bg-gray-100 rounded-full h-2">
+          <div className="w-full bg-[#EBE3FF] rounded-full h-2.5 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all"
+              className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full transition-all shadow-[inset_0_-2px_0_rgba(0,0,0,0.12)]"
               style={{ width: `${track.total > 0 ? (track.done / track.total) * 100 : 0}%` }}
             />
           </div>
-          <p className="text-xs text-gray-400">{track.done}/{track.total} módulos concluídos</p>
+          <p className="text-xs text-gray-400 font-medium">{track.done}/{track.total} módulos concluídos</p>
           <div className="flex gap-2 pt-1">
             {track.currentModuleId && (
               <Link
                 href={`/trilha/${track.id}/modulo/${track.currentModuleId}`}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-xl hover:bg-indigo-700 transition"
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-indigo-600 text-white text-xs font-extrabold uppercase tracking-wide rounded-xl transition hover:brightness-105 shadow-[0_3px_0_#3E2EA0] active:translate-y-0.5 active:shadow-[0_1px_0_#3E2EA0]"
               >
                 <PlayCircle className="w-3.5 h-3.5" />
                 Continuar estudando
@@ -163,7 +164,7 @@ export default function DashboardPage() {
             )}
             <Link
               href={`/trilha/${track.id}`}
-              className="flex items-center justify-center gap-1 px-3 py-2 border border-gray-200 text-gray-600 text-xs font-medium rounded-xl hover:bg-gray-50 transition"
+              className="flex items-center justify-center gap-1 px-4 py-3 border-2 border-[#E9E4F2] text-gray-500 text-xs font-extrabold uppercase tracking-wide rounded-xl hover:bg-gray-50 transition"
             >
               Ver trilha <ChevronRight className="w-3 h-3" />
             </Link>
@@ -173,9 +174,9 @@ export default function DashboardPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Chart */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-200">
+        <div className="bg-white rounded-2xl p-6 border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5]">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900">Últimos Simulados</h2>
+            <h2 className="font-extrabold text-[#1A1B2E] text-sm uppercase tracking-wide">Últimos Simulados</h2>
             <TrendingUp className="w-5 h-5 text-gray-400" />
           </div>
           {chartData.length > 0 ? (
@@ -188,7 +189,7 @@ export default function DashboardPage() {
                   formatter={(v) => [`${v}%`, "Score"]}
                   contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb" }}
                 />
-                <Bar dataKey="score" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="score" fill="#6C5CE7" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -202,9 +203,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Weak areas */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-200">
+        <div className="bg-white rounded-2xl p-6 border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5]">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900">Pontos Fracos</h2>
+            <h2 className="font-extrabold text-[#1A1B2E] text-sm uppercase tracking-wide">Pontos Fracos</h2>
             <AlertCircle className="w-5 h-5 text-red-400" />
           </div>
           {stats?.weakChapters && stats.weakChapters.length > 0 ? (
@@ -240,9 +241,9 @@ export default function DashboardPage() {
 
       {/* Recent Simulations */}
       {stats?.recentSimulations && stats.recentSimulations.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-200">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900">Histórico Recente</h2>
+        <div className="bg-white rounded-2xl border-2 border-[#E9E4F2] shadow-[0_2px_0_#D8D2E5] overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b-2 border-[#E9E4F2]">
+            <h2 className="font-extrabold text-[#1A1B2E] text-sm uppercase tracking-wide">Histórico Recente</h2>
             <Link href="/history" className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
               Ver todos <ChevronRight className="w-4 h-4" />
             </Link>
@@ -280,16 +281,16 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         {[
-          { href: "/trilha", label: "Trilha de Estudos", color: "bg-indigo-600" },
-          { href: "/simulation", label: "Novo Simulado", color: "bg-green-600" },
-          { href: "/study-plan", label: "Plano de Estudos", color: "bg-orange-600" },
-        ].map(({ href, label, color }) => (
+          { href: "/trilha", label: "Trilha", color: "bg-indigo-600", shadow: "shadow-[0_3px_0_#3E2EA0]" },
+          { href: "/simulation", label: "Simulado", color: "bg-green-600", shadow: "shadow-[0_3px_0_#166534]" },
+          { href: "/study-plan", label: "Plano de Estudos", color: "bg-orange-500", shadow: "shadow-[0_3px_0_#c2410c]" },
+        ].map(({ href, label, color, shadow }) => (
           <Link
             key={href}
             href={href}
             className={cn(
-              "flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-medium text-center transition hover:opacity-90",
-              color
+              "flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white text-xs font-extrabold uppercase tracking-wide text-center transition hover:brightness-105 active:translate-y-0.5",
+              color, shadow
             )}
           >
             {label}
@@ -302,12 +303,15 @@ export default function DashboardPage() {
 
 function StatCard({ icon, label, value, bg, highlight }: { icon: React.ReactNode; label: string; value: string | number; bg: string; highlight?: boolean }) {
   return (
-    <div className={cn("rounded-2xl p-6 border", highlight ? "bg-green-50 border-green-200" : "bg-white border-gray-200")}>
-      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center mb-4", bg)}>
+    <div className={cn(
+      "rounded-2xl p-5 border-2 shadow-[0_2px_0_#D8D2E5]",
+      highlight ? "bg-green-50 border-green-200" : "bg-white border-[#E9E4F2]"
+    )}>
+      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-3", bg)}>
         {icon}
       </div>
-      <p className={cn("text-3xl font-bold", highlight ? "text-green-700" : "text-gray-900")}>{value}</p>
-      <p className="text-sm text-gray-500 mt-1">{label}</p>
+      <p className={cn("text-2xl font-black", highlight ? "text-green-700" : "text-[#1A1B2E]")}>{value}</p>
+      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mt-1">{label}</p>
     </div>
   );
 }

@@ -31,7 +31,10 @@ export function BottomNav() {
   const navItems = isAdmin ? [...baseNavItems, adminNavItem] : baseNavItems;
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <nav
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t-2 border-[#E9E4F2]"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
       <div className="flex items-center justify-around px-1 py-2">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
@@ -41,8 +44,12 @@ export function BottomNav() {
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-all min-h-[44px] justify-center min-w-0",
-                isAdminItem && active && "bg-indigo-600 text-white rounded-xl"
+                "flex flex-col items-center gap-0.5 px-2 py-2 rounded-xl transition-all min-h-[44px] justify-center min-w-0",
+                isAdminItem && active
+                  ? "bg-indigo-600"
+                  : active
+                  ? "bg-indigo-50"
+                  : ""
               )}
             >
               <Icon
@@ -55,10 +62,10 @@ export function BottomNav() {
               />
               <span
                 className={cn(
-                  "text-xs font-medium leading-tight",
+                  "text-[10px] font-extrabold leading-tight uppercase tracking-wide",
                   isAdminItem
                     ? active ? "text-white" : "text-indigo-500"
-                    : active ? "text-indigo-600" : "text-gray-500"
+                    : active ? "text-indigo-600" : "text-gray-400"
                 )}
               >
                 {label}

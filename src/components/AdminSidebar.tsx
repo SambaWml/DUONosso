@@ -30,7 +30,7 @@ export function AdminSidebar() {
             <ShieldCheck className="w-4 h-4 text-white" />
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-white text-sm leading-tight truncate">CTFL Smart Prep</p>
+            <p className="font-semibold text-white text-sm leading-tight truncate">QVenture</p>
             <p className="text-[10px] text-indigo-400 font-medium tracking-wide uppercase mt-0.5">Painel Admin</p>
           </div>
         </div>
