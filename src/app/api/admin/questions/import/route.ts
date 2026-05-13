@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Nenhuma questão para importar." }, { status: 400 });
   }
 
-  const VALID_ANSWERS = new Set(["A", "B", "C", "D"]);
+  const VALID_ANSWER_RE = /^[A-D]{1,4}$/;
   const VALID_DIFFS = new Set(["EASY", "MEDIUM", "HARD"]);
 
   const errors: string[] = [];
@@ -50,7 +50,9 @@ export async function POST(req: NextRequest) {
     if (!q.alternativeA?.trim() || !q.alternativeB?.trim() || !q.alternativeC?.trim() || !q.alternativeD?.trim()) {
       errors.push(`Linha ${row}: todas as alternativas são obrigatórias`); continue;
     }
-    if (!VALID_ANSWERS.has(q.correctAnswer)) { errors.push(`Linha ${row}: correctAnswer deve ser A, B, C ou D`); continue; }
+    const ans = (q.correctAnswer ?? "").toUpperCase().replace(/,\s*/g, "");
+    if (!VALID_ANSWER_RE.test(ans)) { errors.push(`Linha ${row}: correctAnswer deve conter apenas as letras A, B, C e/ou D`); continue; }
+    q.correctAnswer = ans.length === 1 ? ans : ans.split("").join(",");
     if (!q.explanation?.trim()) { errors.push(`Linha ${row}: explanation obrigatória`); continue; }
     if (q.difficulty && !VALID_DIFFS.has(q.difficulty)) { errors.push(`Linha ${row}: difficulty inválida`); continue; }
     valid.push(q);

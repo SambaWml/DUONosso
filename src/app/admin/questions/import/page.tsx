@@ -163,12 +163,14 @@ function download(content: string, filename: string, type: string) {
 
 // ── Component ───────────────────────────────────────────────────────────────
 
-const VALID_ANSWERS = new Set(["A", "B", "C", "D"]);
+const VALID_ANSWER_RE = /^[A-D]{1,4}$/;
 const VALID_DIFFICULTIES = new Set(["EASY", "MEDIUM", "HARD"]);
+
+function isValidAnswer(v: string) { return VALID_ANSWER_RE.test((v ?? "").toUpperCase()); }
 
 function validateQ(q: ParsedQuestion): string | null {
   if (!q.statement?.trim()) return "Enunciado obrigatório";
-  if (!VALID_ANSWERS.has((q.correctAnswer ?? "").toUpperCase())) return "correctAnswer deve ser A, B, C ou D";
+  if (!isValidAnswer(q.correctAnswer ?? "")) return "correctAnswer deve conter apenas A, B, C e/ou D";
   return null;
 }
 
@@ -344,7 +346,7 @@ export default function ImportPage() {
               Colunas: <code className="bg-blue-100 px-1 rounded">moduleName</code> (nome exato do módulo já cadastrado),{" "}
               <code className="bg-blue-100 px-1 rounded">statement</code>,{" "}
               <code className="bg-blue-100 px-1 rounded">alternativeA–D</code>,{" "}
-              <code className="bg-blue-100 px-1 rounded">correctAnswer</code> (A/B/C/D),{" "}
+              <code className="bg-blue-100 px-1 rounded">correctAnswer</code> (A/B/C/D ou combinações como BD, AC),{" "}
               <code className="bg-blue-100 px-1 rounded">explanation</code>,{" "}
               <code className="bg-blue-100 px-1 rounded">difficulty</code> (EASY/MEDIUM/HARD),{" "}
               <code className="bg-blue-100 px-1 rounded">syllabusRef</code>,{" "}
@@ -472,19 +474,18 @@ export default function ImportPage() {
                         />
                       </td>
                       <td className="px-4 py-2">
-                        <select
+                        <input
                           value={(q.correctAnswer ?? "").toUpperCase()}
-                          onChange={(e) => updateQ(i, "correctAnswer", e.target.value)}
+                          onChange={(e) => updateQ(i, "correctAnswer", e.target.value.toUpperCase().replace(/[^A-D]/g, ""))}
+                          maxLength={4}
+                          placeholder="ex: BD"
                           className={cn(
-                            "text-xs font-bold rounded px-1.5 py-0.5 border focus:outline-none focus:ring-1 focus:ring-indigo-300",
-                            VALID_ANSWERS.has((q.correctAnswer ?? "").toUpperCase())
+                            "w-16 text-xs font-bold rounded px-1.5 py-0.5 border focus:outline-none focus:ring-1 focus:ring-indigo-300",
+                            isValidAnswer(q.correctAnswer ?? "")
                               ? "bg-green-100 text-green-700 border-green-200"
                               : "bg-red-100 text-red-700 border-red-300"
                           )}
-                        >
-                          <option value="">—</option>
-                          {["A","B","C","D"].map((v) => <option key={v} value={v}>{v}</option>)}
-                        </select>
+                        />
                       </td>
                       <td className="px-4 py-2">
                         <select
@@ -594,19 +595,18 @@ export default function ImportPage() {
                                   />
                                 </td>
                                 <td className="px-4 py-2">
-                                  <select
+                                  <input
                                     value={(q.correctAnswer ?? "").toUpperCase()}
-                                    onChange={(e) => updateBundleQ(mi, qi, "correctAnswer", e.target.value)}
+                                    onChange={(e) => updateBundleQ(mi, qi, "correctAnswer", e.target.value.toUpperCase().replace(/[^A-D]/g, ""))}
+                                    maxLength={4}
+                                    placeholder="ex: BD"
                                     className={cn(
-                                      "text-xs font-bold rounded px-1.5 py-0.5 border focus:outline-none focus:ring-1 focus:ring-indigo-300",
-                                      VALID_ANSWERS.has((q.correctAnswer ?? "").toUpperCase())
+                                      "w-16 text-xs font-bold rounded px-1.5 py-0.5 border focus:outline-none focus:ring-1 focus:ring-indigo-300",
+                                      isValidAnswer(q.correctAnswer ?? "")
                                         ? "bg-green-100 text-green-700 border-green-200"
                                         : "bg-red-100 text-red-700 border-red-300"
                                     )}
-                                  >
-                                    <option value="">—</option>
-                                    {["A","B","C","D"].map((v) => <option key={v} value={v}>{v}</option>)}
-                                  </select>
+                                  />
                                 </td>
                                 <td className="px-4 py-2">
                                   <select

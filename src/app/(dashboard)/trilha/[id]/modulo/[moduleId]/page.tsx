@@ -415,8 +415,10 @@ export default function ModulePage() {
                   )}
                   {OPTIONS.map((opt) => {
                     const text = e[`alternative${opt}` as keyof EvaluatedAnswer] as string;
-                    const isCorrect = e.correctAnswer === opt;
-                    const isSelected = e.selected === opt;
+                    const correctOpts = new Set(e.correctAnswer.split(",").map((s) => s.trim()));
+                    const selectedOpts = new Set((e.selected ?? "").split(",").map((s) => s.trim()).filter(Boolean));
+                    const isCorrect = correctOpts.has(opt);
+                    const isSelected = selectedOpts.has(opt);
                     return (
                       <div
                         key={opt}

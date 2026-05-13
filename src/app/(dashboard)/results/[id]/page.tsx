@@ -417,8 +417,10 @@ export default function ResultsPage() {
                     {(["A", "B", "C", "D"] as const).map((altKey) => {
                       const text = q[`alternative${altKey}` as keyof QuestionData] as string;
                       const expl = q[`explanation${altKey}` as keyof QuestionData] as string | null;
-                      const isCorrect = q.correctAnswer === altKey;
-                      const isSelected = answer.selectedAnswer === altKey;
+                      const correctOpts = new Set(q.correctAnswer.split(",").map((s) => s.trim()));
+                      const selectedOpts = new Set((answer.selectedAnswer ?? "").split(",").map((s) => s.trim()).filter(Boolean));
+                      const isCorrect = correctOpts.has(altKey);
+                      const isSelected = selectedOpts.has(altKey);
 
                       return (
                         <div
